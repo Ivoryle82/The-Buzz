@@ -40,6 +40,6 @@ This is a team repository.  It is intended for use during phase 1 and beyond.
 
 To Load Others Changes into your local repository:
 
-1. ```git fetch origin 'branch name'```
+1. ```git fetch origin 'branch name'``` or ```git pull origin 'branch name'```
 2. This loads the changes other people made to the branch into your local branch
 3. Note: you will probably have resolve conflicts. Be careful when selecting what changes to (add/not add)
