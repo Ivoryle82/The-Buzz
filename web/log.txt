@@ -1,0 +1,138 @@
+commit ff555f5ef2e41f5d98ff183d27bb7b48e8179ade
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Mon Feb 12 20:41:18 2024 -0500
+
+    completed unit tests for web
+
+commit 7b6bf6c729e74a1752f7c0b4aa1eb74fa76858a7
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Mon Feb 12 20:39:42 2024 -0500
+
+    added the apptest and spec_runner to web
+
+commit 81bad8c58a8968e1b472a1820148f8869956d70d
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Sun Feb 11 19:47:39 2024 -0500
+
+    finished the web front-end tutorial
+
+commit 77bff109dfe0ca19613fe939c9253fa89e341e36
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Sun Feb 11 19:43:32 2024 -0500
+
+    created changing UI behavior for click by changing style.display
+
+commit 76aa8893cdec8d0c1ff09d3fedc20814c7507f33
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Sun Feb 11 18:11:08 2024 -0500
+
+    typescript now displays a table of messages
+
+commit e937fb1548ce90cefb72d7a378f3259b0ac64858
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Sun Feb 11 17:38:08 2024 -0500
+
+    added AJAX functionality to submitform method
+
+commit d3eaec06a76a4bcee587d392964680a64e70800a
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Sun Feb 11 17:31:23 2024 -0500
+
+    added TypeScript for form functionality
+
+commit 07827b25eb4c47b8157ff85b68a9ecbd5c818c3e
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Sun Feb 11 16:52:36 2024 -0500
+
+    front-end now shows todo list from prevois tutorial
+
+commit 841d6ba296f3877e54ca4857d4cef46d4b1ab8fb
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Sun Feb 11 16:21:02 2024 -0500
+
+    created basic web interface
+
+commit d492978f5301bafee0ccb5af3ed0461d29902cbb
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Sun Feb 11 16:12:27 2024 -0500
+
+    front-end now fetches messages from the backend!
+
+commit 5be7321e218eca824feb8e29792e8b929f04606c
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Fri Feb 9 15:05:24 2024 -0500
+
+    set up a simple script for deploying the web front end
+
+commit 616faf23c6d39b884bcf202bf768cf12230840d5
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Fri Feb 9 15:03:14 2024 -0500
+
+    updated backend to serve static files from a location given by environment
+
+commit 05697ec2cb17534f39a48d3bcbc48ad5d08f462b
+Merge: c394522 fad1a70
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Fri Feb 9 12:00:22 2024 -0500
+
+    merged backend into web
+
+commit c394522e5c395e65494ccb6ab19c55f8750c54b4
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Thu Feb 8 10:18:13 2024 -0500
+
+    completed web front end tut, but not working rn
+
+commit fad1a70f7e44a5d99e7d81dc5dc3005c8c8c4209
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Tue Feb 6 09:27:53 2024 -0500
+
+    modifications to App & AppTest
+
+commit ddeff7c9ed9a17d1345928b57d0e86a201f7377b
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Mon Feb 5 15:54:13 2024 -0500
+
+    completed tut6
+
+commit 3052439e3c5fc238576b1250f287905d890a9f5f
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Mon Feb 5 15:25:01 2024 -0500
+
+    added backend's .gitignore
+
+commit f98f7af5ad46094c819743f39909c6056977e58e
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Mon Feb 5 15:16:47 2024 -0500
+
+    Completed JSON to Object and GET and POST req with Spark
+
+commit 7896305dcf333798d459c17f190b4f47989dbd12
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Sun Feb 4 18:54:55 2024 -0500
+
+    added a gitignore to backend branch
+
+commit 17327884d5c9e037172add59add94480be0702b8
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Tue Jan 23 18:45:19 2024 -0500
+
+    Added README.md to the backend folder
+
+commit 02f71df86448cc7008ae7f1f12e07ead70e5db58
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Tue Jan 23 18:38:02 2024 -0500
+
+    added README.md to a new web folder on web branch
+
+commit 3d5f3e47b5b57589d1ea4271578e86373363425a
+Author: Evan Hu <exh4wrk@gmail.com>
+Date:   Tue Jan 23 18:26:22 2024 -0500
+
+    Upated README.md to be descriptive of this project
+
+commit c16ce25cba23ad4df5dab38480c093843201c58a
+Author: Evan Hu <exh226@lehigh.edu>
+Date:   Tue Jan 23 22:40:57 2024 +0000
+
+    Initial commit

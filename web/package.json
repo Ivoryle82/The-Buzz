@@ -1,0 +1,17 @@
+{
+    "name": "web-bridge-tutorial",
+    "version": "1.0.0",
+    "description": "A tutorial that shows how to use npm and TypeScript",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "jasmine-core": "^5.1.2"
+    }
+}
