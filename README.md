@@ -8,10 +8,11 @@ This is a team repository.  It is intended for use during phase 1 and beyond.
 - Bitbucket Repository: https://bitbucket.org/sml3/cse216_sp24_team_09
 - Jira Board: https://cse216-24sp-exh226.atlassian.net/jira/software/projects/C2T9/boards/2 
 - backend url: [exh226@dokku.lehigh.edu](https://cse216_sp24_team_09-exh226.dokku.cse.lehigh.edu/)
+- Database : ElephantSQL [Goku]
 - Release 0.0
 
 ## Team Members
-- Sam Maloof (Backed)
+- Sam Maloof (Backend)
 *sjm225@lehigh.edu
 - Evan Hu (Project Manager)
 *exh226@lehigh.edu
@@ -25,3 +26,6 @@ This is a team repository.  It is intended for use during phase 1 and beyond.
 
 ## Doku Instructions
 - ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'ps:start cse216_sp24_team_09'
+
+## Admin Instructions
+- POSTGRES_IP=tiny.db.elephantsql.com POSTGRES_PORT=5432 POSTGRES_USER=syldyaly POSTGRES_PASS=dV4x4m4VuM9WWQ2qHkkwU46bi8CmwMwp
