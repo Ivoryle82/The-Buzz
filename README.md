@@ -28,4 +28,20 @@ This is a team repository.  It is intended for use during phase 1 and beyond.
 - ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'ps:start cse216_sp24_team_09'
 
 ## Admin Instructions
-- POSTGRES_IP=tiny.db.elephantsql.com POSTGRES_PORT=5432 POSTGRES_USER=syldyaly POSTGRES_PASS=dV4x4m4VuM9WWQ2qHkkwU46bi8CmwMwp
+- Description Sprint 1 phase 1 : 
+### Database CLI Application
+
+This Java application provides a command-line interface (CLI) for interacting with a PostgreSQL database. Users can perform various database operations such as creating and dropping tables, querying for specific rows, querying for all rows, deleting rows, inserting new rows, and updating rows.
+
+## Installation
+
+1. Clone the repository to your local machine:
+   ```bash
+   git clone https://github.com/yourusername/your-repository.git
+2. cd your-repository
+3. javac App.java
+
+
+
+- to run: POSTGRES_IP=jelani.db.elephantsql.com POSTGRES_PORT=5432 POSTGRES_USER=zpzzdvck POSTGRES_PASS=bB7p6OwexymsYGtZphn1VxrD8TX-zk27 mvn exec:java
+- to test: POSTGRES_IP=jelani.db.elephantsql.com POSTGRES_PORT=5432 POSTGRES_USER=zpzzdvck POSTGRES_PASS=bB7p6OwexymsYGtZphn1VxrD8TX-zk27 mvn package
