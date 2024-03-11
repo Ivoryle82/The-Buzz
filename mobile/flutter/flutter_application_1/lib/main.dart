@@ -91,18 +91,31 @@ class MessagesList extends StatelessWidget {
         final isFavorite = appState.favorites.contains(message);
         return ListTile(
           title: Text(message),
-          trailing: IconButton(
-            icon: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: isFavorite ? Colors.red : null,
-            ),
-            onPressed: () {
-              appState.toggleFavorite(message);
-            },
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : null,
+                ),
+                onPressed: () {
+                  appState.toggleFavorite(message);
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditMessageScreen(message: message),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-          onTap: () {
-            _editMessage(context, appState, message);
-          },
         );
       },
     );
@@ -149,36 +162,45 @@ class AddMessageScreen extends StatelessWidget {
   }
 }
 
-void _editMessage(BuildContext context, MyAppState appState, String message) {
-  TextEditingController messageController = TextEditingController(text: message);
+class EditMessageScreen extends StatelessWidget {
+  final String message;
+  final TextEditingController _messageController;
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
+  EditMessageScreen({required this.message}) : _messageController = TextEditingController(text: message);
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+
+    return Scaffold(
+      appBar: AppBar(
         title: Text('Edit Message'),
-        content: TextField(
-          controller: messageController,
-          decoration: InputDecoration(
-            hintText: 'Enter your message',
-          ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            TextField(
+              controller: _messageController,
+              decoration: InputDecoration(
+                hintText: 'Enter your message',
+              ),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                final newMessage = _messageController.text;
+                if (newMessage.isNotEmpty) {
+                  appState.editMessage(message, newMessage);
+                  Navigator.pop(context);
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              appState.editMessage(message, messageController.text);
-              Navigator.pop(context);
-            },
-            child: Text('Save'),
-          ),
-        ],
-      );
-    },
-  );
+      ),
+    );
+  }
 }
