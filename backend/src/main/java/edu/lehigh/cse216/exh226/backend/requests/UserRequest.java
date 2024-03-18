@@ -1,4 +1,4 @@
-package edu.lehigh.cse216.exh226.backend;
+package edu.lehigh.cse216.exh226.backend.requests;
 
 /**
  * SimpleRequest provides a format for clients to present title and message
@@ -8,14 +8,14 @@ package edu.lehigh.cse216.exh226.backend;
  * do not need a constructor
  */
 
-public class SimpleRequest {
+public class UserRequest {
     /**
-     * The title being provided by the client
+     * the UserId provided by client
      */
-    public String mTitle;
+    public String mUID;
 
     /**
      * The message being provided by the client
      */
-    public String mMessage;
+    public String mBio;
 }

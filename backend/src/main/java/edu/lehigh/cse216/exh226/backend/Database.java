@@ -198,107 +198,112 @@ public class Database {
         return true; // .close() ran as intended and the reference to the connection is deleted
     }
 
-    /**
-     * Insert a row into the database
-     * 
-     * @param subject : The subject for this new row
-     * @param message : The message body for this new row
-     * 
-     * @return : The number of rows that were inserted
-     */
-    int insertRow(String subject, String message) {
-        int count = 0;
-        try {
-            mInsertOne.setString(1, subject); // I know these insert into (default, ?, ?) but how
-            mInsertOne.setString(2, message);
-            count += mInsertOne.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
+    // /**
+    // * Insert a row into the database
+    // *
+    // * @param subject : The subject for this new row
+    // * @param message : The message body for this new row
+    // *
+    // * @return : The number of rows that were inserted
+    // */
+    // int insertRow(String subject, String message) {
+    // int count = 0;
+    // try {
+    // mInsertOne.setString(1, subject); // I know these insert into (default, ?, ?)
+    // but how
+    // mInsertOne.setString(2, message);
+    // count += mInsertOne.executeUpdate();
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return count;
+    // }
 
-    /**
-     * Query the database for a list of all subjects and their IDs
-     * Equivalent to DataStore.readAll
-     * 
-     * @return All rows, as an ArrayList of RowData (rows) objects
-     */
-    ArrayList<DataRow> selectAll() {
-        ArrayList<DataRow> res = new ArrayList<DataRow>();
-        try {
-            ResultSet rs = mSelectAll.executeQuery(); // executeQuery i assumed executes SQL. So here it is selecting
-                                                      // all via the PreparedStatement to select all
-            while (rs.next()) {
-                res.add(new DataRow(rs.getInt("id"), rs.getString("subject"), null));
-            }
-            rs.close();
-            return res;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+    // /**
+    // * Query the database for a list of all subjects and their IDs
+    // * Equivalent to DataStore.readAll
+    // *
+    // * @return All rows, as an ArrayList of RowData (rows) objects
+    // */
+    // ArrayList<DataRow> selectAll() {
+    // ArrayList<DataRow> res = new ArrayList<DataRow>();
+    // try {
+    // ResultSet rs = mSelectAll.executeQuery(); // executeQuery i assumed executes
+    // SQL. So here it is selecting
+    // // all via the PreparedStatement to select all
+    // while (rs.next()) {
+    // res.add(new DataRow(rs.getInt("id"), rs.getString("subject"), null));
+    // }
+    // rs.close();
+    // return res;
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // return null;
+    // }
+    // }
 
-    /**
-     * Get all data for a specific row, by ID
-     * 
-     * @param id : The id of the row beign requested
-     * 
-     * @return :The data for the requested row (RowData object), or null if invalid
-     *         ID
-     */
-    DataRow selectOne(int id) {
-        DataRow res = null;
-        try {
-            mSelectOne.setInt(1, id);
-            ResultSet rs = mSelectOne.executeQuery();
-            if (rs.next()) { // Why do we do rs.next()?
-                res = new DataRow(rs.getInt("id"), rs.getString("subject"), rs.getString("message"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
+    // /**
+    // * Get all data for a specific row, by ID
+    // *
+    // * @param id : The id of the row beign requested
+    // *
+    // * @return :The data for the requested row (RowData object), or null if
+    // invalid
+    // * ID
+    // */
+    // DataRow selectOne(int id) {
+    // DataRow res = null;
+    // try {
+    // mSelectOne.setInt(1, id);
+    // ResultSet rs = mSelectOne.executeQuery();
+    // if (rs.next()) { // Why do we do rs.next()?
+    // res = new DataRow(rs.getInt("id"), rs.getString("subject"),
+    // rs.getString("message"));
+    // }
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return res;
+    // }
 
-    /**
-     * Delete a row by ID
-     * 
-     * @param id : The id of the row to delete
-     * 
-     * @return : The number of rows that were deleted. -1 indicates an error.
-     */
-    int deleteRow(int id) {
-        int res = -1;
-        try {
-            mDeleteOne.setInt(1, id);
-            res = mDeleteOne.executeUpdate(); // Execute update differs from execute query
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
+    // /**
+    // * Delete a row by ID
+    // *
+    // * @param id : The id of the row to delete
+    // *
+    // * @return : The number of rows that were deleted. -1 indicates an error.
+    // */
+    // int deleteRow(int id) {
+    // int res = -1;
+    // try {
+    // mDeleteOne.setInt(1, id);
+    // res = mDeleteOne.executeUpdate(); // Execute update differs from execute
+    // query
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return res;
+    // }
 
-    /**
-     * Update the message for a row in the database
-     * 
-     * @param id      : The id of the row to update
-     * @param message : the new message contents
-     * 
-     * @return : The number of rows that were updated. -1 indicates an error
-     */
-    int updateOne(int id, String message) {
-        int res = -1;
-        try {
-            mUpdateOne.setString(1, message);
-            mUpdateOne.setInt(2, id);
-            res = mUpdateOne.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
+    // /**
+    // * Update the message for a row in the database
+    // *
+    // * @param id : The id of the row to update
+    // * @param message : the new message contents
+    // *
+    // * @return : The number of rows that were updated. -1 indicates an error
+    // */
+    // int updateOne(int id, String message) {
+    // int res = -1;
+    // try {
+    // mUpdateOne.setString(1, message);
+    // mUpdateOne.setInt(2, id);
+    // res = mUpdateOne.executeUpdate();
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return res;
+    // }
 
     /**
      * Create tblData. If it already exists, print an error

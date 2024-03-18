@@ -30,6 +30,7 @@ This is a team repository.  It is intended for use during phase 1 and beyond.
 ## Admin Instructions
 - POSTGRES_IP=tiny.db.elephantsql.com POSTGRES_PORT=5432 POSTGRES_USER=syldyaly POSTGRES_PASS=dV4x4m4VuM9WWQ2qHkkwU46bi8CmwMwp
 
+
 ## Git Instructions  
 1. After finishing writing code, DO NOT merge to master and then push the master branch.
 2. Instead, do ```git push origin 'branch name' ```
