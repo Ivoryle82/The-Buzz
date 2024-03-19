@@ -20,16 +20,15 @@ public class MessageController {
         mSelectAll = mConnection.prepareStatement("SELECT * FROM message ORDER BY PID DESC");
         mSelectOne = mConnection.prepareStatement("SELECT * FROM message WHERE PID=?");
         mUpdateOne = mConnection.prepareStatement("UPDATE message SET content = ? WHERE PID = ?");
-        mInsertOne = mConnection.prepareStatement("INSERT INTO message VALUES (default, ? , ?)");
+        mInsertOne = mConnection.prepareStatement("INSERT INTO message VALUES (default, ?)");
 
     }
 
     // this one im having trouble with
-    public int insertRow(String UID, String content) {
+    public int insertRow(String content) {
         int count = 0;
         try {
-            mInsertOne.setString(1, UID);
-            mInsertOne.setString(2, content);
+            mInsertOne.setString(1, content);
             count += mInsertOne.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -43,7 +42,7 @@ public class MessageController {
             ResultSet rs = mSelectAll.executeQuery(); // executeQuery i assumed executes SQL. So here it is selecting
                                                       // all via the PreparedStatement to select all
             while (rs.next()) {
-                res.add(new Message(rs.getInt("PID"), rs.getString("UID"), null));
+                res.add(new Message(rs.getInt("PID"), null));
             }
             rs.close();
             return res;
@@ -59,7 +58,7 @@ public class MessageController {
             mSelectOne.setInt(1, PID);
             ResultSet rs = mSelectOne.executeQuery();
             if (rs.next()) { // Why do we do rs.next()?
-                res = new Message(rs.getInt("PID"), rs.getString("UID"), rs.getString("content"));
+                res = new Message(rs.getInt("PID"), rs.getString("content"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -16,6 +16,10 @@ import java.util.Map;
  */
 public class App {
 
+    private static final String DEFAULT_URL_DB = "";
+    private static final String DEFAULT_PORT_DB = "5432";
+    private static final int DEFAULT_PORT_SPARK = 4567;
+
     static int getIntFromEnv(String envar, int defaultVal) {
         ProcessBuilder processBuilder = new ProcessBuilder();
         if (processBuilder.environment().get(envar) != null) {
@@ -50,7 +54,7 @@ public class App {
         // https://stackoverflow.com/questions/10380835/is-it-ok-to-use-gson-instance-as-a-static-field-in-a-model-bean-reuse
         final Gson gson = new Gson();
 
-        Database mdDatabase = Database.getDatabase(DEFAULT_PORT_DB, DEFAULT_PORT_DB);
+        Database mdDatabase = Database.getDatabase(DEFAULT_URL_DB, DEFAULT_PORT_DB);
         // dataStore holds all of the data that has been provided via HTTP requests
         //
         // NB: everytime we shut down the server, we will lose all data, and
@@ -87,12 +91,10 @@ public class App {
      * and then use them as parameters in the DataBase class I made that connects
      * to postgres sql server
      */
-    private static final String DEFAULT_PORT_DB = "5432";
-    private static final int DEFAULT_PORT_SPARK = 4567;
 
     private static Database getDataBaseConnection() {
         if (System.getenv("DATABASE_URL") != null) {
-            return Database.getDatabase(System.getenv("DATABASE_URL"), DEFAULT_PORT_DB);
+            return Database.getDatabase(System.getenv("DATABASE_URL"), DEFAULT_URL_DB);
         }
         Map<String, String> env = System.getenv();
         // System.out.println("TEST: " + env);

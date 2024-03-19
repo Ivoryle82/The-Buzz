@@ -12,7 +12,7 @@ public class MessageRequest {
 
     public int mPID;
 
-    public String mUID;
+    // public String mUID;
 
     /**
      * The message being provided by the client

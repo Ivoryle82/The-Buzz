@@ -135,7 +135,7 @@ public class DatabaseRoutes {
             response.type("application/json");
 
             // NB: createEntry already checks for null title and message
-            int newId = mdb.insertRow(req.mUID, req.mContent);
+            int newId = mdb.insertRow(req.mContent);
             if (newId == -1) {
                 return gson.toJson(new StructuredResponse("error", "error performing insertion", null));
             } else {

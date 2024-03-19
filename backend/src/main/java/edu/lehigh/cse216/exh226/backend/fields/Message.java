@@ -17,11 +17,6 @@ public class Message {
     public int PID;
 
     /**
-     * This is the id of the user who created the post
-     */
-    public final String UID;
-
-    /**
      * This is what is inside the message
      */
     public String content;
@@ -35,12 +30,11 @@ public class Message {
      * Create a row of interactions
      * 
      * @param PID     This is the unqiue postId
-     * @param UID     : the userID of the person who posted
      * @param content : this is the message content
      */
-    public Message(int PID, String UID, String content) {
+    public Message(int PID, String content) {
         this.PID = PID;
-        this.UID = UID;
+
         this.content = content;
         mCreated = new Date();
     }
@@ -50,7 +44,7 @@ public class Message {
      */
     Message(Message data) {
         PID = data.PID;
-        UID = data.UID;
+        // UID = data.UID;
         content = data.content;
         mCreated = data.mCreated;
     }
