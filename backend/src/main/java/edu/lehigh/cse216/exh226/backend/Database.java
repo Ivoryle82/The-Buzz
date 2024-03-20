@@ -17,6 +17,83 @@ public class Database {
      */
     private Connection mConnection;
 
+    // =========== Prepared Statements for working with userTbl =========
+    /**
+     * mInsertOneUserTbl: inserts an entry into the userTbl
+     */
+    private PreparedStatement mInsertOneUser;
+
+    /**
+     * mSelectOneUser: selects one entry from userTbl, necessary for
+     * user to view their own profile
+     */
+    private PreparedStatement mSelectOneUser;
+
+    /**
+     * mUpdateOneUser: updates one entry from userTbl, necessary for
+     * user to update their profile
+     * Tech Debt: When updating a profile need to update all corresponding data
+     */
+    private PreparedStatement mUpdateOneUser;
+
+    /**
+     * mDeleteOneUser: deletes one entry from userTbl, necessary for
+     * user to delete their profile.
+     * Tech Debt: When deleting a profile need to delete all corresponding data
+     */
+    private PreparedStatement mDeleteOneUser; // TECH DEBT: IMPLEMENT THIS LATER
+    // ========== End of userTbl Prepared Statements ==========
+
+    // ========== Prepared Statements for messageTbl ==========
+    /**
+     * mInsertOneMessage: inserts an entry into the messageTbl
+     */
+    private PreparedStatement mInsertOneMessage;
+
+    /**
+     * mSelectOneMessage: selects one entry from messageTbl, necessary for
+     * user to view any message
+     */
+    private PreparedStatement mSelectOneMessage;
+
+    /**
+     * mSelectAllMessage: selects all entry from messageTbl, necessary for
+     * user to view all messages from anyone.
+     * Tech Debt: may make more sense to make them only able to view all of their
+     * own messages
+     */
+    private PreparedStatement mSelectAllMessage;
+
+    /**
+     * mUpdateOneMessage: updates one entry from messageTbl, necessary for
+     * user to update a message of theirs
+     * Tech Debt: When updating a message user should only be able to update theirs
+     */
+    private PreparedStatement mUpdateOneMessage;
+
+    /**
+     * mDeleteOneMessage: deletes one entry from messageTbl, necessary for
+     * user to delete their profile.
+     * Tech Debt: When deleting a message need to delete all corresponding data,
+     * IE: the userLikes from the userLikesTbl
+     */
+    private PreparedStatement mDeleteOneMessage;
+
+    // ========== End of messageTbl Prepared Statements =========
+
+    // ========== Prepared Statements for userLikesTbl ==========
+    /**
+     * mInsertOneUserLike: inserts one entry into the userLikeTbl
+     */
+    private PreparedStatement mInsertOneUserLike;
+
+    /**
+     * mDeleteOneUserLike: deletes one entry into the userLikeTbl
+     */
+    private PreparedStatement mDeleteOneUserLike;
+
+    // ========== End of userLikesTbl Prepared Statements ========
+
     /**
      * A prepared statement for getting all data in the database
      */
@@ -51,21 +128,23 @@ public class Database {
      */
     private PreparedStatement mDropTable;
 
+    /**
+     * createPreparedStatements: initialize all prepared statements
+     * This is called in the getDatabase() method which returns a Database object
+     * that gets a connection with our SQL database
+     * 
+     * Tech Debt: We should make the Strings for each prepared statement in
+     * constant variables declared at the top of the program
+     * Tech Debt: We need to get rid of the functionality for adding and dropping a
+     * table, only admin should be allowed to do this
+     * 
+     * @return this (the current Database object), null if there was an error
+     * 
+     */
     private Database createPreparedStatements() {
-        // NB: when refactoring i get rid of the db because when calling
-        // db.createPreparedStatements()
-        // createPreparedStatements is a method of the class so it will access the
-        // instance db's attributes
-        // Attempt to create all our our prepared statements. If any of these
-        // shall fail, the whole getDatabase() call should fail
         // NB: PreparedStatement(s) are prepared into the connection with
-        // .prepareStatement("")
-        // The parameter is SQL language
+        // .prepareStatement("") The parameter is SQL language
         try {
-            // NB: a common error here is typing the SQL incorrectly (this could mess up our
-            // database)
-            // A better practice is to set constants for SQL such as "tblData"
-
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table
             // creation/deletion, so multiple executions will cause an exception
             mCreateTable = mConnection.prepareStatement(
@@ -104,7 +183,7 @@ public class Database {
     }
 
     /**
-     * Get a fully-configured connection to the database
+     * Get a fully-configured connection to the database on specified port
      * 
      * @param host The IP address of the database server
      * @param port The port on the database server to which connection requests
@@ -145,7 +224,8 @@ public class Database {
     }
 
     /**
-     * Get a fully-configured connection to the database
+     * getDatabase: second getDatabase method gets a fully-configured connection to
+     * the database. Calls the above getDatabase() method after parsing db_url
      * 
      * @param db_url       The postgres database url
      * @param port_default port to use if absent in db_url this will be 5432 in the
@@ -154,7 +234,6 @@ public class Database {
      * @return A Database object, or null if we cannot connect properly
      */
     static Database getDatabase(String db_url, String port_default) {
-        // 2nd method is just meant to parse a db_url. then we call the first
         try {
             URI dbUri = new URI(db_url);
             String username = dbUri.getUserInfo().split(":")[0];
@@ -166,18 +245,22 @@ public class Database {
             return getDatabase(host, port, path, username, password);
         } catch (URISyntaxException e) {
             System.err.println("Error: URI Syntax Error");
-            // e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
     }
 
     /**
-     * Close the currect connection to the database, if one exists
+     * disconnect: Close the currect connection to the database, if one exists
      * 
      * NB: The connection will always be null after this call, even if an error
      * occurs during the closing operation
      * 
-     * @return True if teh connection was cleanly close, false otherwise
+     * Tech Debt: must close result sets and prepared statements before closing the
+     * connection. Use the .close() method for the prepared statements and result
+     * sets
+     * 
+     * @return True if the connection was cleanly closed, false otherwise
      */
     boolean disconnect() {
         if (mConnection == null) {
@@ -198,26 +281,25 @@ public class Database {
         return true; // .close() ran as intended and the reference to the connection is deleted
     }
 
-    // /**
-    // * Insert a row into the database
-    // *
-    // * @param subject : The subject for this new row
-    // * @param message : The message body for this new row
-    // *
-    // * @return : The number of rows that were inserted
-    // */
-    // int insertRow(String subject, String message) {
-    // int count = 0;
-    // try {
-    // mInsertOne.setString(1, subject); // I know these insert into (default, ?, ?)
-    // but how
-    // mInsertOne.setString(2, message);
-    // count += mInsertOne.executeUpdate();
-    // } catch (SQLException e) {
-    // e.printStackTrace();
-    // }
-    // return count;
-    // }
+    /**
+     * insertRow: Insert a row into the database
+     *
+     * @param subject : The subject for this new row
+     * @param message : The message body for this new row
+     *
+     * @return : The number of rows that were inserted
+     */
+    int insertRow(String subject, String message) {
+        int count = 0;
+        try {
+            mInsertOne.setString(1, subject);
+            mInsertOne.setString(2, message);
+            count += mInsertOne.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
 
     // /**
     // * Query the database for a list of all subjects and their IDs
