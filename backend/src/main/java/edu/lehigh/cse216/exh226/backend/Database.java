@@ -108,39 +108,39 @@ public class Database {
     // ========== End of userLikesTbl Prepared Statements ========
 
     // KEEP THE PREPARED STATEMENTS BELOW UNTIL AFTER TESTING THE ONES ABOVE
-    /**
-     * A prepared statement for getting all data in the database
-     */
-    private PreparedStatement mSelectAll;
+    // /**
+    // * A prepared statement for getting all data in the database
+    // */
+    // private PreparedStatement mSelectAll;
 
-    /**
-     * A prepared statement for getting on row form the database
-     */
-    private PreparedStatement mSelectOne;
+    // /**
+    // * A prepared statement for getting on row form the database
+    // */
+    // private PreparedStatement mSelectOne;
 
-    /**
-     * A prepared statement for deleting a row from the database
-     */
-    private PreparedStatement mDeleteOne;
+    // /**
+    // * A prepared statement for deleting a row from the database
+    // */
+    // private PreparedStatement mDeleteOne;
 
-    /**
-     * A prepared statement for inseting into the database
-     */
-    private PreparedStatement mInsertOne;
+    // /**
+    // * A prepared statement for inseting into the database
+    // */
+    // private PreparedStatement mInsertOne;
 
-    /**
-     * A prepared statment for updating a single row in the database
-     */
-    private PreparedStatement mUpdateOne;
-    /**
-     * A prepared statement for creating the table in our database
-     */
-    private PreparedStatement mCreateTable;
+    // /**
+    // * A prepared statment for updating a single row in the database
+    // */
+    // private PreparedStatement mUpdateOne;
+    // /**
+    // * A prepared statement for creating the table in our database
+    // */
+    // private PreparedStatement mCreateTable;
 
-    /**
-     * A prepared statment for dropping the table in our database
-     */
-    private PreparedStatement mDropTable;
+    // /**
+    // * A prepared statment for dropping the table in our database
+    // */
+    // private PreparedStatement mDropTable;
 
     /**
      * createPreparedStatements: initialize all prepared statements
@@ -184,14 +184,19 @@ public class Database {
                     .prepareStatement("DELETE FROM userLikesTbl WHERE username=? AND messageID=?");
 
             // BELOW STATEMENTS ARE UNECESSARY BUT KEEP THEM IN FOR NOW UNTIL AFTER TESTING
-            mCreateTable = mConnection.prepareStatement(
-                    "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) NOT NULL, message VARCHAR(500) NOT NULL)");
-            mDropTable = mConnection.prepareStatement("DROP TABLE tblData");
-            mDeleteOne = mConnection.prepareStatement("DELETE FROM tblDATA WHERE id = ?");
-            mInsertOne = mConnection.prepareStatement("INSERT INTO tblData VALUES (default, ?, ?)");
-            mSelectAll = mConnection.prepareStatement("SELECT id, subject FROM tblData");
-            mSelectOne = mConnection.prepareStatement("SELECT * from tblData WHERE id=?");
-            mUpdateOne = mConnection.prepareStatement("UPDATE tblData SET message = ? WHERE id = ?");
+            // mCreateTable = mConnection.prepareStatement(
+            // "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) NOT NULL,
+            // message VARCHAR(500) NOT NULL)");
+            // mDropTable = mConnection.prepareStatement("DROP TABLE tblData");
+            // mDeleteOne = mConnection.prepareStatement("DELETE FROM tblDATA WHERE id =
+            // ?");
+            // mInsertOne = mConnection.prepareStatement("INSERT INTO tblData VALUES
+            // (default, ?, ?)");
+            // mSelectAll = mConnection.prepareStatement("SELECT id, subject FROM tblData");
+            // mSelectOne = mConnection.prepareStatement("SELECT * from tblData WHERE
+            // id=?");
+            // mUpdateOne = mConnection.prepareStatement("UPDATE tblData SET message = ?
+            // WHERE id = ?");
         } catch (SQLException e) {
             System.err.println("Error creating prepared statements");
             e.printStackTrace();
@@ -634,72 +639,72 @@ public class Database {
 
     // BELOW METHODS ARE UNECESSARY AND WILL BE DELETED
 
-    /**
-     * insertRow: Insert a row into the database
-     *
-     * @param subject : The subject for this new row
-     * @param message : The message body for this new row
-     *
-     * @return : The number of rows that were inserted
-     */
-    int insertRow(String subject, String message) {
-        int count = 0;
-        try {
-            mInsertOne.setString(1, subject);
-            mInsertOne.setString(2, message);
-            count += mInsertOne.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
+    // /**
+    // * insertRow: Insert a row into the database
+    // *
+    // * @param subject : The subject for this new row
+    // * @param message : The message body for this new row
+    // *
+    // * @return : The number of rows that were inserted
+    // */
+    // int insertRow(String subject, String message) {
+    // int count = 0;
+    // try {
+    // mInsertOne.setString(1, subject);
+    // mInsertOne.setString(2, message);
+    // count += mInsertOne.executeUpdate();
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return count;
+    // }
 
-    /**
-     * Query the database for a list of all subjects and their IDs
-     * Equivalent to DataStore.readAll
-     *
-     * @return All rows, as an ArrayList of RowData (rows) objects
-     */
-    ArrayList<DataRow> selectAll() {
-        ArrayList<DataRow> res = new ArrayList<DataRow>();
-        try {
-            ResultSet rs = mSelectAll.executeQuery(); // executeQuery i assumed executes
-            // SQL. So here it is selecting
-            // all via the PreparedStatement to select all
-            while (rs.next()) {
-                res.add(new DataRow(rs.getInt("id"), rs.getString("subject"), null));
-            }
-            rs.close();
-            return res;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+    // /**
+    // * Query the database for a list of all subjects and their IDs
+    // * Equivalent to DataStore.readAll
+    // *
+    // * @return All rows, as an ArrayList of RowData (rows) objects
+    // */
+    // ArrayList<DataRow> selectAll() {
+    // ArrayList<DataRow> res = new ArrayList<DataRow>();
+    // try {
+    // ResultSet rs = mSelectAll.executeQuery(); // executeQuery i assumed executes
+    // // SQL. So here it is selecting
+    // // all via the PreparedStatement to select all
+    // while (rs.next()) {
+    // res.add(new DataRow(rs.getInt("id"), rs.getString("subject"), null));
+    // }
+    // rs.close();
+    // return res;
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // return null;
+    // }
+    // }
 
-    /**
-     * Get all data for a specific row, by ID
-     *
-     * @param id : The id of the row beign requested
-     *
-     * @return :The data for the requested row (RowData object), or null if
-     *         invalid
-     *         ID
-     */
-    DataRow selectOne(int id) {
-        DataRow res = null;
-        try {
-            mSelectOne.setInt(1, id);
-            ResultSet rs = mSelectOne.executeQuery();
-            if (rs.next()) { // Why do we do rs.next()?
-                res = new DataRow(rs.getInt("id"), rs.getString("subject"),
-                        rs.getString("message"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
+    // /**
+    // * Get all data for a specific row, by ID
+    // *
+    // * @param id : The id of the row beign requested
+    // *
+    // * @return :The data for the requested row (RowData object), or null if
+    // * invalid
+    // * ID
+    // */
+    // DataRow selectOne(int id) {
+    // DataRow res = null;
+    // try {
+    // mSelectOne.setInt(1, id);
+    // ResultSet rs = mSelectOne.executeQuery();
+    // if (rs.next()) { // Why do we do rs.next()?
+    // res = new DataRow(rs.getInt("id"), rs.getString("subject"),
+    // rs.getString("message"));
+    // }
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return res;
+    // }
 
     // /**
     // * Delete a row by ID
@@ -744,22 +749,23 @@ public class Database {
      * Create tblData. If it already exists, print an error
      * we know it creates tblData bc that is the name from the PreparedStatement
      */
-    void createTable() {
-        try {
-            mCreateTable.execute(); // another new execute command, prob differs based on SQL content
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    // void createTable() {
+    // try {
+    // mCreateTable.execute(); // another new execute command, prob differs based on
+    // SQL content
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // }
 
-    /**
-     * Remove tblData from the database. If it does not exist, print an error
-     */
-    void dropTable() {
-        try {
-            mDropTable.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+    // /**
+    // * Remove tblData from the database. If it does not exist, print an error
+    // */
+    // void dropTable() {
+    // try {
+    // mDropTable.execute();
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // }
 }
