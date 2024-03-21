@@ -85,12 +85,19 @@ public class Database {
     /**
      * mInsertOneUserLike: inserts one entry into the userLikeTbl
      */
-    private PreparedStatement mInsertOneUserLike;
+    private PreparedStatement mInsertOneUserLikes;
+
+    /**
+     * mSelectOneUserLike: selects one entry from the userLikeTbl
+     * based on a passed username and messageID.
+     * If this returns null it means the user hasn't liked the message yet
+     */
+    private PreparedStatement mSelectOneUserLikes;
 
     /**
      * mDeleteOneUserLike: deletes one entry into the userLikeTbl
      */
-    private PreparedStatement mDeleteOneUserLike;
+    private PreparedStatement mDeleteOneUserLikes;
 
     // ========== End of userLikesTbl Prepared Statements ========
 
@@ -158,8 +165,10 @@ public class Database {
             mSelectAllMessage = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE username=?");
             mDeleteOneMessage = mConnection.prepareStatement("DELETE FROM messageTbl WHERE messageID=?");
             // Prepared Statements for userLikesTbl
-            mInsertOneUserLike = mConnection.prepareStatement("INSERT INTO userLikesTbl VALUES (?,?)");
-            mDeleteOneUserLike = mConnection
+            mInsertOneUserLikes = mConnection.prepareStatement("INSERT INTO userLikesTbl VALUES (?,?)");
+            mSelectOneUserLikes = mConnection
+                    .prepareStatement("SELECT * FROM userLikesTbl WHERE messageID=? AND username=?");
+            mDeleteOneUserLikes = mConnection
                     .prepareStatement("DELETE FROM userLikesTbl WHERE username=? AND messageID=?");
 
             // BELOW STATEMENTS ARE UNECESSARY BUT KEEP THEM IN FOR NOW UNTIL AFTER TESTING
@@ -172,7 +181,7 @@ public class Database {
             mSelectOne = mConnection.prepareStatement("SELECT * from tblData WHERE id=?");
             mUpdateOne = mConnection.prepareStatement("UPDATE tblData SET message = ? WHERE id = ?");
         } catch (SQLException e) {
-            System.err.println("Error creating prepared statement");
+            System.err.println("Error creating prepared statements");
             e.printStackTrace();
             disconnect();
             return null;
@@ -213,8 +222,7 @@ public class Database {
             path = "/";
         }
 
-        // Create an un-configured Database object
-        Database db = new Database();
+        Database db = new Database(); // Create an un-configured Database object
 
         // Give the Database object a connection, fail if we cannot get one
         try {
@@ -296,6 +304,100 @@ public class Database {
     }
 
     /**
+     * The methods below all are used to work with the 3 tables within the database
+     * via the prepared statements initialized above
+     */
+
+    /**
+     * insertUserTblRow: Creates one user in the userTbl
+     * 
+     * @param username : a string for the username (primary key)
+     * @param password : a string for the password
+     * @param bio      : a string for the user's biography
+     * @param email    : a string for the user's email
+     * 
+     * @return : returns the number of rows in userTbl
+     * 
+     */
+    int insertUserTblRow(String username, String password, String bio, String email) {
+        int count = 0;
+        try {
+            mInsertOneUser.setString(1, username);
+            mInsertOneUser.setString(2, password);
+            mInsertOneUser.setString(2, bio);
+            mInsertOneUser.setString(2, email);
+            count += mInsertOneUser.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    /**
+     * selectOneUserTblRow: selects one user from the userTbl
+     * 
+     * @param username : the username (unique primary key) for an element in userTbl
+     * 
+     * @return : returns a UserDataRow
+     * 
+     */
+    UserDataRow selectOneUser(String username) {
+        UserDataRow res = null;
+        try {
+            mSelectOneUser.setString(1, username);
+            ResultSet rs = mSelectOne.executeQuery();
+            if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
+                res = new UserDataRow(rs.getInt("id"), rs.getString("subject"),
+                        rs.getString("message"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    /**
+     * updateOneUserTblRow
+     * 
+     */
+    /**
+     * deleteOneUserTblRow
+     * 
+     */
+
+    /**
+     * insertMessageTblRow
+     * 
+     */
+    /**
+     * selectOneMessageTblRow
+     * 
+     */
+    /**
+     * selectAllMessageTblRow
+     */
+    /**
+     * updateOneMessageTblRow
+     * 
+     */
+    /**
+     * deleteOneMessageTblRow
+     * 
+     */
+    /**
+     * insertUserLikesTblRow
+     * 
+     */
+
+    /**
+     * selectOneUserLikesTblRow
+     * 
+     */
+    /**
+     * deleteOneUserLikesTblRow
+     * 
+     */
+    /**
      * insertRow: Insert a row into the database
      *
      * @param subject : The subject for this new row
@@ -315,52 +417,52 @@ public class Database {
         return count;
     }
 
-    // /**
-    // * Query the database for a list of all subjects and their IDs
-    // * Equivalent to DataStore.readAll
-    // *
-    // * @return All rows, as an ArrayList of RowData (rows) objects
-    // */
-    // ArrayList<DataRow> selectAll() {
-    // ArrayList<DataRow> res = new ArrayList<DataRow>();
-    // try {
-    // ResultSet rs = mSelectAll.executeQuery(); // executeQuery i assumed executes
-    // SQL. So here it is selecting
-    // // all via the PreparedStatement to select all
-    // while (rs.next()) {
-    // res.add(new DataRow(rs.getInt("id"), rs.getString("subject"), null));
-    // }
-    // rs.close();
-    // return res;
-    // } catch (SQLException e) {
-    // e.printStackTrace();
-    // return null;
-    // }
-    // }
+    /**
+     * Query the database for a list of all subjects and their IDs
+     * Equivalent to DataStore.readAll
+     *
+     * @return All rows, as an ArrayList of RowData (rows) objects
+     */
+    ArrayList<DataRow> selectAll() {
+        ArrayList<DataRow> res = new ArrayList<DataRow>();
+        try {
+            ResultSet rs = mSelectAll.executeQuery(); // executeQuery i assumed executes
+            // SQL. So here it is selecting
+            // all via the PreparedStatement to select all
+            while (rs.next()) {
+                res.add(new DataRow(rs.getInt("id"), rs.getString("subject"), null));
+            }
+            rs.close();
+            return res;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-    // /**
-    // * Get all data for a specific row, by ID
-    // *
-    // * @param id : The id of the row beign requested
-    // *
-    // * @return :The data for the requested row (RowData object), or null if
-    // invalid
-    // * ID
-    // */
-    // DataRow selectOne(int id) {
-    // DataRow res = null;
-    // try {
-    // mSelectOne.setInt(1, id);
-    // ResultSet rs = mSelectOne.executeQuery();
-    // if (rs.next()) { // Why do we do rs.next()?
-    // res = new DataRow(rs.getInt("id"), rs.getString("subject"),
-    // rs.getString("message"));
-    // }
-    // } catch (SQLException e) {
-    // e.printStackTrace();
-    // }
-    // return res;
-    // }
+    /**
+     * Get all data for a specific row, by ID
+     *
+     * @param id : The id of the row beign requested
+     *
+     * @return :The data for the requested row (RowData object), or null if
+     *         invalid
+     *         ID
+     */
+    DataRow selectOne(int id) {
+        DataRow res = null;
+        try {
+            mSelectOne.setInt(1, id);
+            ResultSet rs = mSelectOne.executeQuery();
+            if (rs.next()) { // Why do we do rs.next()?
+                res = new DataRow(rs.getInt("id"), rs.getString("subject"),
+                        rs.getString("message"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
 
     // /**
     // * Delete a row by ID
