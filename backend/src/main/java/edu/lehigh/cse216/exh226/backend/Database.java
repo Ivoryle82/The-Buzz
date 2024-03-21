@@ -72,6 +72,12 @@ public class Database {
     private PreparedStatement mUpdateOneMessage;
 
     /**
+     * mUpdateMessageLikes: updates the likeCount field only for and element
+     * in the messageTbl. Finds the message via messageID.
+     */
+    private PreparedStatement mUpdateOneMessageLikes;
+
+    /**
      * mDeleteOneMessage: deletes one entry from messageTbl, necessary for
      * user to delete their profile.
      * Tech Debt: When deleting a message need to delete all corresponding data,
@@ -159,11 +165,17 @@ public class Database {
             mUpdateOneUser = mConnection.prepareStatement(
                     "UPDATE userTbl SET userID=0,username=?,password=?,bio=?,email=? WHERE username=?");
             mDeleteOneUser = mConnection.prepareStatement("DELETE FROM userTbl WHERE username=?");
+
             // Prepared Statements for messageTbl
             mInsertOneMessage = mConnection.prepareStatement("INSERT INTO messageTbl VALUES (?,?,?,?,0)");
             mSelectOneMessage = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE messageID=?");
             mSelectAllMessage = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE username=?");
+            mUpdateOneMessage = mConnection.prepareStatement(
+                    "UPDATE messageTbl SET title=?,content=? WHERE messageID=?");
+            mUpdateOneMessageLikes = mConnection.prepareStatement(
+                    "UPDATE messageTbl SET likeCount=? WHERE messageID=?");
             mDeleteOneMessage = mConnection.prepareStatement("DELETE FROM messageTbl WHERE messageID=?");
+
             // Prepared Statements for userLikesTbl
             mInsertOneUserLikes = mConnection.prepareStatement("INSERT INTO userLikesTbl VALUES (?,?)");
             mSelectOneUserLikes = mConnection
@@ -323,8 +335,8 @@ public class Database {
         try {
             mInsertOneUser.setString(1, username);
             mInsertOneUser.setString(2, password);
-            mInsertOneUser.setString(2, bio);
-            mInsertOneUser.setString(2, email);
+            mInsertOneUser.setString(3, bio);
+            mInsertOneUser.setString(4, email);
             count += mInsertOneUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -402,40 +414,226 @@ public class Database {
             e.printStackTrace();
         }
         return res;
+    } // End of userTbl methods
+
+    /**
+     * insertMessageTblRow: Creates one message in the messageTbl
+     * 
+     * Tech Debt: backend should generate a unique messageID for each message
+     * 
+     * @param username  : a string for the username (foreign key)
+     * @param messageID : a string for the messageID (primary key)
+     * @param title     : a String for the message title
+     * @param content   : a String for the message content
+     * @param likeCount : an int for the likeCount, will be 0
+     * 
+     * @return : returns the number of rows in messageTbl
+     */
+    int insertMessageTblRow(String username, String messageID, String title, String content, int likeCount) {
+        int count = 0;
+        try {
+            mInsertOneMessage.setString(1, username);
+            mInsertOneMessage.setString(2, messageID);
+            mInsertOneMessage.setString(3, title);
+            mInsertOneMessage.setString(4, content);
+            mInsertOneMessage.setInt(5, likeCount);
+            count += mInsertOneMessage.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
     }
 
     /**
-     * insertMessageTblRow
+     * selectOneMessageTblRow: selects one message from the messageTbl
      * 
-     */
-    /**
-     * selectOneMessageTblRow
+     * @param messageID : a String for the messageID (unique primary key) for an
+     *                  element in messageTbl
      * 
+     * @return : returns a MessageDataRow
      */
-    /**
-     * selectAllMessageTblRow
-     */
-    /**
-     * updateOneMessageTblRow
-     * 
-     */
-    /**
-     * deleteOneMessageTblRow
-     * 
-     */
-    /**
-     * insertUserLikesTblRow
-     * 
-     */
+    MessageDataRow selectOneMessageTblRow(String messageID) {
+        MessageDataRow res = null;
+        try {
+            mSelectOneMessage.setString(1, messageID);
+            ResultSet rs = mSelectOneMessage.executeQuery();
+            if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
+                res = new MessageDataRow(rs.getString("username"), rs.getString("messageID"),
+                        rs.getString("title"), rs.getString("content"), rs.getInt("likeCount"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
 
     /**
-     * selectOneUserLikesTblRow
+     * selectAllMessageTblRow: selects all messages for a specific user
      * 
+     * @param username : a String for the username
+     * 
+     * @return : an ArrayList of MessageDataRow objects
      */
+    ArrayList<MessageDataRow> selectAllMessageTblRow(String username) {
+        ArrayList<MessageDataRow> res = new ArrayList<MessageDataRow>();
+        try {
+            mSelectAllMessage.setString(1, username);
+            ResultSet rs = mSelectAllMessage.executeQuery();
+            while (rs.next()) {
+                res.add(new MessageDataRow(rs.getString("username"), rs.getString("messageID"), rs.getString("title"),
+                        rs.getString("content"), rs.getInt("likeCount")));
+            }
+            rs.close();
+            return res;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     /**
-     * deleteOneUserLikesTblRow
+     * updateOneMessageTblRow : updates one row in the messageTbl
      * 
+     * Tech Debt: need to make sure that a user can choose to
+     * update any number of these fields, or have front end deal w/ this
+     * just need to make sure we pass enough parameters (and correct ones) in here
+     * 
+     * @param messageID  : a String for the messageID
+     * @param newTitle   : a String for the new password
+     * @param newContent : a String for the new bio
+     *
+     * @return : returns an int for the number of rows that were updated, or -1 if
+     *         there was an error
      */
+    int updateOneMessageTblRow(String messageID, String newTitle, String newContent) {
+        int res = -1;
+        try {
+            mUpdateOneMessage.setString(1, newTitle);
+            mUpdateOneMessage.setString(2, newContent);
+            mUpdateOneMessage.setString(3, messageID); // this is how we query the specific row in messageTbl
+            res = mUpdateOneMessage.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    /**
+     * updateOneMessageTblRowLikes : updates one row in the messageTbl
+     * 
+     * Tech Debt: In the backend we can use the selectOneMessageTblRow to first get
+     * the likes and have that increment or decrement via a route to that method.
+     * Then use that resulting value to update the likeCount.
+     * OR we could have 2 separate database methods, 1 for inc and 1 for dec
+     * likeCount, BUT, doing that would require us to call the
+     * selectOneMessageTblRow anyway before incrementing or decrementing the
+     * likeCount
+     * 
+     * @param messageID    : a String for the messageID
+     * @param newLikeCount : an int for the new likeCount
+     *
+     * @return : returns an int for the number of rows that were updated, or -1 if
+     *         there was an error
+     */
+    int updateOneMessageTblRowLikes(String messageID, int newLikeCount) {
+        int res = -1;
+        try {
+            mUpdateOneMessageLikes.setInt(1, newLikeCount);
+            mUpdateOneMessageLikes.setString(2, messageID); // this is how we query the specific row in messageTbl
+            res = mUpdateOneMessageLikes.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    /**
+     * deleteOneMessageTblRow: deletes one row in messageTbl
+     * 
+     * @param messageID : a String for the message of the messageTbl row to delete
+     * 
+     * @return : The number of rows that were deleted, return -1 if there was an
+     *         error
+     */
+    int deleteOneMessageTblRow(String messageID) {
+        int res = -1;
+        try {
+            mDeleteOneMessage.setString(1, messageID);
+            res = mDeleteOneMessage.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    } // End of messageTbl methods
+
+    /**
+     * insertUserLikesTblRow: Creates one userLikes in the userLikesTbl
+     * 
+     * @param username  : a string for the username
+     * @param messageID : a String for the messageID
+     * 
+     * @return : returns the number of rows in userLikesTbl
+     */
+    int insertUserLikesTblRow(String username, String messageID) {
+        int count = 0;
+        try {
+            mInsertOneUserLikes.setString(1, username);
+            mInsertOneUserLikes.setString(2, messageID);
+            count += mInsertOneUserLikes.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    /**
+     * selectOneUserLikesTblRow: selects one userLikes from the userLikesTbl
+     * 
+     * @param username  : a String for the username of an element in userLikesTbl
+     * @param messageID : a String for the messageID of an element in userLikesTbl
+     * 
+     * @return : returns a UserLikesDataRow
+     */
+    UserLikesDataRow selectOneUserLikesTblRow(String username, String messageID) {
+        UserLikesDataRow res = null;
+        try {
+            mSelectOneUserLikes.setString(1, username);
+            mSelectOneUserLikes.setString(2, messageID);
+            ResultSet rs = mSelectOneUserLikes.executeQuery();
+            if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
+                res = new UserLikesDataRow(rs.getString("username"), rs.getString("messageID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    /**
+     * deleteOneUserLikesTblRow: deletes one row in userLikesTbl
+     * 
+     * @param username  : a String for the username of the userLikesTbl row to
+     *                  delete
+     * @param messageID : a String for the messageID of the userLikesTbl row to
+     *                  delete
+     * 
+     * @return : The number of rows that were deleted, return -1 if there was an
+     *         error (this included if a row was not deleted)
+     */
+    int deleteOneUserLikesTblRow(String username, String messageID) {
+        int res = -1;
+        try {
+            mDeleteOneUserLikes.setString(1, username);
+            mDeleteOneUserLikes.setString(2, messageID);
+            res = mDeleteOneUserLikes.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    } // End of userLikesTbl methods
+
+    // BELOW METHODS ARE UNECESSARY AND WILL BE DELETED
+
     /**
      * insertRow: Insert a row into the database
      *
