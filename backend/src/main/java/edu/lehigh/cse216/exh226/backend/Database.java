@@ -94,6 +94,7 @@ public class Database {
 
     // ========== End of userLikesTbl Prepared Statements ========
 
+    // KEEP THE PREPARED STATEMENTS BELOW UNTIL AFTER TESTING THE ONES ABOVE
     /**
      * A prepared statement for getting all data in the database
      */
@@ -145,13 +146,26 @@ public class Database {
         // NB: PreparedStatement(s) are prepared into the connection with
         // .prepareStatement("") The parameter is SQL language
         try {
-            // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table
-            // creation/deletion, so multiple executions will cause an exception
+            // Prepared Statements for userTbl
+            mInsertOneUser = mConnection.prepareStatement("INSERT INTO userTbl VALUES (0, ?, ?, ?, ?)");
+            mSelectOneUser = mConnection.prepareStatement("SELECT * FROM userTbl WHERE username=?");
+            mUpdateOneUser = mConnection.prepareStatement(
+                    "UPDATE userTbl SET userID=0,username=?,password=?,bio=?,email=? WHERE username=?");
+            mDeleteOneUser = mConnection.prepareStatement("DELETE FROM userTbl WHERE username=?");
+            // Prepared Statements for messageTbl
+            mInsertOneMessage = mConnection.prepareStatement("INSERT INTO messageTbl VALUES (?,?,?,?,0)");
+            mSelectOneMessage = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE messageID=?");
+            mSelectAllMessage = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE username=?");
+            mDeleteOneMessage = mConnection.prepareStatement("DELETE FROM messageTbl WHERE messageID=?");
+            // Prepared Statements for userLikesTbl
+            mInsertOneUserLike = mConnection.prepareStatement("INSERT INTO userLikesTbl VALUES (?,?)");
+            mDeleteOneUserLike = mConnection
+                    .prepareStatement("DELETE FROM userLikesTbl WHERE username=? AND messageID=?");
+
+            // BELOW STATEMENTS ARE UNECESSARY BUT KEEP THEM IN FOR NOW UNTIL AFTER TESTING
             mCreateTable = mConnection.prepareStatement(
                     "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) NOT NULL, message VARCHAR(500) NOT NULL)");
             mDropTable = mConnection.prepareStatement("DROP TABLE tblData");
-
-            // Standard CRUD operations
             mDeleteOne = mConnection.prepareStatement("DELETE FROM tblDATA WHERE id = ?");
             mInsertOne = mConnection.prepareStatement("INSERT INTO tblData VALUES (default, ?, ?)");
             mSelectAll = mConnection.prepareStatement("SELECT id, subject FROM tblData");
