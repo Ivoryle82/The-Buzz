@@ -112,13 +112,15 @@ public class App {
         });
 
         /**
-         * Route for logging in. Queries the userTbl to see if the password matches
+         * Route for logging in (GET). Queries the userTbl to see if the password
+         * matches
          * with the username. If it does, return the username to the front-end. Serving
          * as a token that authorizes that corresponding user's interactions. Else, do
          * nothing (for now).
          * 
-         * Parameters:
-         * Front-end must pass username and password as Strings
+         * Parameters(data in request.body):
+         * username : String
+         * password : String
          * 
          * Tech Debt: We should probably create an authorization token randomly and have
          * it as field in the userTbl. Then, give that to the user.
@@ -129,21 +131,126 @@ public class App {
          */
 
         /**
-         * Route to return all messages. Queries the messageTbl and returns all
+         * Route to return all messages (GET). Queries the messageTbl and returns all
          * elements.
          * 
-         * Parameters:
+         * Parameters(data in request.body):
          * none
          * 
          * "http://localhost:4567/messages"
          */
 
         /**
-         * Route to view one message. Queries the messageTbl and returns on element
+         * Route to view one message (GET). Queries the messageTbl and returns on
+         * element
          * based on messageID.
          * 
-         * Parameters:
-         * messageID : String (for now)
+         * Parameters(data in request.body):
+         * none
+         * 
+         * "http://localhost:4567/messages:messageID"
+         */
+
+        /**
+         * Route to add one message to messageTbl (POST)
+         * 
+         * Parameters(data in request.body):
+         * title : String
+         * content : String
+         * username : String
+         * 
+         * Parameters(data in request url):
+         * messageID : String (this will not be a required parameter after backend makes
+         * functionality to update the messageID as a unique int)
+         * 
+         * "http://localhost:4567/messages:messageID/add"
+         */
+
+        /**
+         * Route to update one message in messageTbl (PUT)
+         * 
+         * Parameters(data in request.body):
+         * title : String
+         * content : String
+         * username : String
+         * 
+         * Parameters(data in request url):
+         * messageID : String (this will not be a required parameter after backend makes
+         * functionality to update the messageID as a unique int)
+         * 
+         * "http://localhost:4567/messages:messageID/edit"
+         */
+
+        /**
+         * Route to delete one message in messageTbl (DELETE)
+         * 
+         * Parameters(data in request.body):
+         * username : String, this is so a user can only delete his messages. SO this
+         * must match the token given at login.
+         * 
+         * Parameters(data in request url):
+         * messageID : String (this will not be a required parameter after backend makes
+         * functionality to update the messageID as a unique int)
+         * 
+         * "http://localhost:4567/messages:messageID/edit"
+         */
+
+        /**
+         * Route to like or unlike a message (PUT)
+         * 
+         * Parameters(data in request.body):
+         * username : String, this is so a user can only delete his messages. SO this
+         * must match the token given at login.
+         * 
+         * Parameters(data in request url):
+         * messageID : String (this will not be a required parameter after backend makes
+         * functionality to update the messageID as a unique int)
+         * 
+         * "http://localhost:4567/messages:messageID/like"
+         */
+
+        /**
+         * Route to view user profile (GET)
+         * 
+         * Parameters(data in request.body):
+         * none
+         * 
+         * Parameters(data in request url):
+         * username : String
+         * 
+         * "http://localhost:4567/userprofiles:username"
+         */
+
+        /**
+         * Route to update user profile (PUT)
+         * 
+         * Parameters(data in request.body):
+         * newUsername : String
+         * newPassword : String
+         * newBio : String
+         * newEmail : String
+         * 
+         * Parameters(data in request url):
+         * username : String, (this is used for authentication, we will change this
+         * later)
+         * 
+         * "http://localhost:4567/userprofiles:username/edit"
+         * 
+         * TECH DEBT: username passed like this has many flaws, plz read everything I
+         * wrote about Tech Debt of create authentication token
+         */
+
+        /**
+         * Route to delete user profile (DELETE)
+         * 
+         * Parameters(data in request.body):
+         * none
+         * 
+         * Parameters(data in request url):
+         * username : String, (this is used for authentication, we will change this
+         * later)
+         * 
+         * "http://localhost:4567/userprofiles:username/delete"
          */
 
     }
