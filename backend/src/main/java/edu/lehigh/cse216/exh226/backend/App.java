@@ -9,10 +9,12 @@ import edu.lehigh.cse216.exh226.backend.DatabaseRoutes;
 import java.util.Map;
 
 /**
- * For now, our app creates an HTTP server with only one route
+ * For now, our app creates an HTTP server that is run via the localhost
+ * (127.0.0.1), localhost is what makes the HTTP requests (until this gets
+ * deployed to dokku servers).
  * 
- * When an HTTP client connects to this erver on the default SPARK port (4567),
- * and request /hello, we return "Hello World". Otherwise, we produce an error
+ * The port I am using for the Java Spark requests is '4567'
+ * The default port for the database is '5432'
  */
 public class App {
 
@@ -20,6 +22,37 @@ public class App {
     private static final String DEFAULT_PORT_DB = "5432";
     private static final int DEFAULT_PORT_SPARK = 4567;
 
+    /**
+     * getDataBaseConnection() : establishes a connection to the database provided
+     * by the DATABASE_URL enviornment variables, or using separate environment
+     * variables that hold the fields of the DATABASE_URL
+     *
+     * @return : returns a Database object with an established connection to the
+     *         cloud database passed via the DATABASE_URL. IE: now we can use the
+     *         Database.java functionality to communicate with the SQL database.
+     */
+    private static Database getDataBaseConnection() {
+        if (System.getenv("DATABASE_URL") != null) {
+            return Database.getDatabase(System.getenv("DATABASE_URL"), DEFAULT_URL_DB);
+        }
+        Map<String, String> env = System.getenv();
+        String ip = env.get("POSTGRES_IP");
+        String port = env.get("POSTGRES_PORT");
+        String user = env.get("POSTGRES_USER");
+        String pass = env.get("POSTGRES_PASS");
+        return Database.getDatabase(ip, port, "", user, pass);
+    }
+
+    /**
+     * getIntFromEnv : searches the system's environment variables for "PORT", then
+     * parses that value as an int
+     * 
+     * @param envar      : a String, the environment variable to search for
+     * @param defaultVal : an int, the default integer value to use for the port if
+     *                   envar is not found.
+     * 
+     * @returns : an int, either the defaultVal, or the value stored at envar
+     */
     static int getIntFromEnv(String envar, int defaultVal) {
         ProcessBuilder processBuilder = new ProcessBuilder();
         if (processBuilder.environment().get(envar) != null) {
@@ -29,17 +62,15 @@ public class App {
     }
 
     /**
-     * Get an integer environment variable if it exists, and otherwise
-     * return the default value
+     * main() : the main method for app.java.
+     * 1. Ports Java spark to listen to HTTP request via the browser from localhost
+     * 2. Establishes a connection to the database
+     * 3. Contains all the routes for all the frontend's functionality
      * 
-     * @envar The name of the enviornment variable to get.
-     * @defaultVal The integer value to use as the default if envar isn't found
-     * 
-     * @returns The best answer we could come up with for a value for envar
+     * @param args : unused argument
      */
-
     public static void main(String[] args) {
-        // Set the port on which to listen for requests from the environment
+        // Set the port on which to listen for requests from localhost
         Spark.port(getIntFromEnv("PORT", DEFAULT_PORT_SPARK));
 
         // Get a fully-configured connection to the database, or exit immediately
@@ -47,21 +78,16 @@ public class App {
         if (db == null) {
             return;
         }
-        // gson provides us with a way to turn JSON into objects & objects into JSON
-        //
-        // NB: gson is thread-safe
-        // SEE:
+
+        // Import google's Gson library as gson. SEE:
         // https://stackoverflow.com/questions/10380835/is-it-ok-to-use-gson-instance-as-a-static-field-in-a-model-bean-reuse
         final Gson gson = new Gson();
 
-        Database mdDatabase = Database.getDatabase(DEFAULT_URL_DB, DEFAULT_PORT_DB);
-        // dataStore holds all of the data that has been provided via HTTP requests
-        //
-        // NB: everytime we shut down the server, we will lose all data, and
-        // everytime we start the server, we'll have an empty dataStore,
-        // with IDs starting over from 0.
+        // I dont know why this is here, we should only ever getDatabase through the
+        // getDatabaseConnection method
+        // Database mdDatabase = Database.getDatabase(DEFAULT_URL_DB, DEFAULT_PORT_DB);
 
-        // Set up the location for serving static files
+        // Set up the location for serving static files (currently to deploy front-end)
         // If the STATIC_LOCATION environment variable is set, we will serve it.
         // Otherwise, serve from /web
         // This, combined with the bash script allows us to edit web front end elements
@@ -74,35 +100,52 @@ public class App {
             Spark.staticFiles.externalLocation(static_location_override);
         }
 
-        // prob dont need
-        // final DataStore dataStore = new DataStore();
-
-        // Set up a route for serving the main page
-        Spark.get("/", (req, res) -> { // a request for "/" is same as "http://localhost:4567/"
+        /**
+         * Route for serving the main page, redirects the browser to the DOM in
+         * index.html
+         * 
+         * "http://localhost:4567/"
+         */
+        Spark.get("/", (req, res) -> {
             res.redirect("/index.html");
             return "";
         });
 
-    }
+        /**
+         * Route for logging in. Queries the userTbl to see if the password matches
+         * with the username. If it does, return the username to the front-end. Serving
+         * as a token that authorizes that corresponding user's interactions. Else, do
+         * nothing (for now).
+         * 
+         * Parameters:
+         * Front-end must pass username and password as Strings
+         * 
+         * Tech Debt: We should probably create an authorization token randomly and have
+         * it as field in the userTbl. Then, give that to the user.
+         * We should also pass to the web front end something to indicate a failed login
+         * attempt so the front-end can notify the user they got the password wrong
+         * 
+         * "http://localhost:4567/login/:username/:password"
+         */
 
-    /**
-     * For connecting backend to SQL database.
-     * 1. I need to store my postgres elephant sql stuff in environment variables
-     * and then use them as parameters in the DataBase class I made that connects
-     * to postgres sql server
-     */
+        /**
+         * Route to return all messages. Queries the messageTbl and returns all
+         * elements.
+         * 
+         * Parameters:
+         * none
+         * 
+         * "http://localhost:4567/messages"
+         */
 
-    private static Database getDataBaseConnection() {
-        if (System.getenv("DATABASE_URL") != null) {
-            return Database.getDatabase(System.getenv("DATABASE_URL"), DEFAULT_URL_DB);
-        }
-        Map<String, String> env = System.getenv();
-        // System.out.println("TEST: " + env);
-        String ip = env.get("POSTGRES_IP");
-        String port = env.get("POSTGRES_PORT"); // NB: I WILL NEED THIS LATER
-        String user = env.get("POSTGRES_USER");
-        String pass = env.get("POSTGRES_PASS");
-        return Database.getDatabase(ip, port, "", user, pass);
+        /**
+         * Route to view one message. Queries the messageTbl and returns on element
+         * based on messageID.
+         * 
+         * Parameters:
+         * messageID : String (for now)
+         */
+
     }
 
 }
