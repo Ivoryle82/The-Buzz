@@ -343,7 +343,7 @@ public class Database {
         UserDataRow res = null;
         try {
             mSelectOneUser.setString(1, username);
-            ResultSet rs = mSelectOne.executeQuery();
+            ResultSet rs = mSelectOneUser.executeQuery();
             if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
                 res = new UserDataRow(rs.getString("username"), rs.getString("password"),
                         rs.getString("bio"), rs.getString("email"));
@@ -367,8 +367,8 @@ public class Database {
      * @param newBio      : a String for the new bio
      * @param newEmail    : a String for the new email
      * 
-     * @return : returns the number of rows that were updated, or -1 if there was an
-     *         error
+     * @return : returns an int for the number of rows that were updated, or -1 if
+     *         there was an error
      */
     int updateOneUserTblRow(String username, String newUsername, String newPassword, String newBio, String newEmail) {
         int res = -1;
@@ -378,7 +378,7 @@ public class Database {
             mUpdateOneUser.setString(3, newBio);
             mUpdateOneUser.setString(4, newEmail);
             mUpdateOneUser.setString(5, username); // this is how we query the specific row in userTbl
-            res = mUpdateOne.executeUpdate();
+            res = mUpdateOneUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -386,9 +386,23 @@ public class Database {
     }
 
     /**
-     * deleteOneUserTblRow
+     * deleteOneUserTblRow: deletes one row in userTbl
      * 
+     * @param username : a String for the username of the userTbl row to delete
+     * 
+     * @return : The number of rows that were deleted, return -1 if there was an
+     *         error
      */
+    int deleteOneUserTblRow(String username) {
+        int res = -1;
+        try {
+            mDeleteOneUser.setString(1, username);
+            res = mDeleteOneUser.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
 
     /**
      * insertMessageTblRow
