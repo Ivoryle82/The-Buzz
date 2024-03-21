@@ -303,10 +303,10 @@ public class Database {
         return true; // .close() ran as intended and the reference to the connection is deleted
     }
 
-    /**
+    /********************************************************************************
      * The methods below all are used to work with the 3 tables within the database
      * via the prepared statements initialized above
-     */
+     ********************************************************************************/
 
     /**
      * insertUserTblRow: Creates one user in the userTbl
@@ -317,7 +317,6 @@ public class Database {
      * @param email    : a string for the user's email
      * 
      * @return : returns the number of rows in userTbl
-     * 
      */
     int insertUserTblRow(String username, String password, String bio, String email) {
         int count = 0;
@@ -339,16 +338,15 @@ public class Database {
      * @param username : the username (unique primary key) for an element in userTbl
      * 
      * @return : returns a UserDataRow
-     * 
      */
-    UserDataRow selectOneUser(String username) {
+    UserDataRow selectOneUserTblRow(String username) {
         UserDataRow res = null;
         try {
             mSelectOneUser.setString(1, username);
             ResultSet rs = mSelectOne.executeQuery();
             if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new UserDataRow(rs.getInt("id"), rs.getString("subject"),
-                        rs.getString("message"));
+                res = new UserDataRow(rs.getString("username"), rs.getString("password"),
+                        rs.getString("bio"), rs.getString("email"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -357,9 +355,36 @@ public class Database {
     }
 
     /**
-     * updateOneUserTblRow
+     * updateOneUserTblRow : updates one row in the userTbl
      * 
+     * Tech Debt: need to make sure that a user can choose to
+     * update any number of these fields, or have front end deal w/ this
+     * just need to make sure we pass enough parameters (and correct ones) in here
+     * 
+     * @param username    : a String for username of the userTbl row to update
+     * @param newUsername : a String for the new username
+     * @param newPassword : a String for the new password
+     * @param newBio      : a String for the new bio
+     * @param newEmail    : a String for the new email
+     * 
+     * @return : returns the number of rows that were updated, or -1 if there was an
+     *         error
      */
+    int updateOneUserTblRow(String username, String newUsername, String newPassword, String newBio, String newEmail) {
+        int res = -1;
+        try {
+            mUpdateOneUser.setString(1, newUsername);
+            mUpdateOneUser.setString(2, newPassword);
+            mUpdateOneUser.setString(3, newBio);
+            mUpdateOneUser.setString(4, newEmail);
+            mUpdateOneUser.setString(5, username); // this is how we query the specific row in userTbl
+            res = mUpdateOne.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
     /**
      * deleteOneUserTblRow
      * 
