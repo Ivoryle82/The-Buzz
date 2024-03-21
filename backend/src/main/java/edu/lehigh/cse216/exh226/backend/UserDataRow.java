@@ -2,8 +2,6 @@ package edu.lehigh.cse216.exh226.backend;
 
 import java.util.Date;
 
-import org.postgresql.translation.messages_bg;
-
 /**
  * Class UserDataRow: represents a row in the SQL userTbl
  * NB: This class needs no getter or setters, this is because
