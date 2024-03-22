@@ -5,7 +5,7 @@ import spark.Spark; // Import the Spark package, so we can use the get function 
 import com.google.gson.*; // Import Google's JSON library
 
 import edu.lehigh.cse216.exh226.backend.controllers.*;
-import edu.lehigh.cse216.exh226.backend.DatabaseRoutes;
+//import edu.lehigh.cse216.exh226.backend.DatabaseRoutes;
 import java.util.Map;
 
 /**
@@ -169,34 +169,35 @@ public class App {
          * Route to update user profile (PUT)
          * 
          * Parameters(data in request.body):
-         * mUsername : String
-         * newUsername : String
-         * newPassword : String
-         * newBio : String
-         * newEmail : String
+         * mNewUsername : String
+         * mPassword : String
+         * mBio : String
+         * mEmail : String
+         * mUsername : String (this is for authentication)
          * 
          * Parameters(data in request url):
-         * username : String, (this is used for authentication, we will change this
-         * later)
+         * username : String
          * 
          * "http://localhost:4567/userprofiles:username/edit"
          * 
          * TECH DEBT: username passed like this has many flaws, plz read everything I
-         * wrote about Tech Debt of create authentication token
+         * wrote about Tech Debt of creating an authentication token
          */
         Spark.put("/userprofiles:username/edit", (request, response) -> {
-            String username = request.params("messageID");
+            String username = request.params("username");
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
 
-            MessageRequest reqData = gson.fromJson(request.body(), MessageRequest.class);
-            MessageDataRow msgData = db.selectOneMessageTblRow(messageID);
-            if (reqData.mUsername.equals(msgData.mUsername)) {
-                int numRows = db.updateOneMessageTblRow(messageID, reqData.mTitle, reqData.mContent);
-                return gson.toJson(new StructuredResponse("ok", "total messages: " + numRows, null));
+            UserRequest reqData = gson.fromJson(request.body(), UserRequest.class);
+            UserDataRow userData = db.selectOneUserTblRow(username);
+
+            if (reqData.mUsername.equals(userData.mUsername)) { // Front end is logged in, we are allowed to edit
+                db.updateOneUserTblRow(userData.mUsername, reqData.mNewUsername, reqData.mPassword, reqData.mBio,
+                        reqData.mEmail);
+                return gson.toJson(new StructuredResponse("ok", "user updated profile", null));
             } else {
-                return gson.toJson(new StructuredResponse("error", "tried to edit a message that wasnt yours", null));
+                return gson.toJson(new StructuredResponse("error", "tried to edit a user that wasnt yours", null));
             }
         });
 
@@ -204,14 +205,29 @@ public class App {
          * Route to delete user profile (DELETE)
          * 
          * Parameters(data in request.body):
-         * none
+         * mUsername : String (for authentication)
          * 
          * Parameters(data in request url):
-         * username : String, (this is used for authentication, we will change this
-         * later)
+         * username : String
          * 
          * "http://localhost:4567/userprofiles:username/delete"
          */
+        Spark.delete("/userprofiles:username/delete", (request, response) -> {
+            String username = request.params("username");
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+
+            UserRequest reqData = gson.fromJson(request.body(), UserRequest.class);
+            UserDataRow userData = db.selectOneUserTblRow(username);
+
+            if (reqData.mUsername.equals(userData.mUsername)) { // Front end is logged in, we are allowed to delete
+                db.deleteOneUserTblRow(userData.mUsername);
+                return gson.toJson(new StructuredResponse("ok", "user deleted profile", null));
+            } else {
+                return gson.toJson(new StructuredResponse("error", "tried to delete a user that wasnt yours", null));
+            }
+        });
 
         /**
          * Route to return all messages (GET). Queries the messageTbl and returns all
@@ -253,6 +269,9 @@ public class App {
          * 
          * Parameters(data in request.body):
          * none
+         * 
+         * Parameters(data in request url):
+         * messageID : String
          * 
          * "http://localhost:4567/messages:messageID"
          */
@@ -396,14 +415,10 @@ public class App {
 }
 
 /**
- * You should also consider refactoring your code at this point. In both
- * App.java
- * and DataStore.java, there are redundant operations that could be moved to
- * separate
- * functions to improve reuse. It would also be worthwhile to use try/catch
- * blocks to
- * catch the exceptions that are leading to Spark generating 500 Internal server
- * error
- * messages, and instead sending back JSON. Doing so will make the front-end we
- * eventually write a little bit simpler.
+ * TECHNICAL DEBT: IN A LOT OF THESE MEHTODS I KINDA IGNORED THE RETURN VALUE
+ * FROM SOME OF THE DATABASE METHODS
+ * --> ADD THE PROPER FUNCTIONALITY FOR ALL DATABASE METHODS SO THEY GIVE A
+ * SPECIFIC RETURN VALUE IF THE METHOD FAILS
+ * --> THEN MAKE SURE ALL THE ROUTES HANDLE THAT METHOD CORRECTLY AND SET THE
+ * PROPER STATUS CODE FOR EACH INTERACTION
  */
