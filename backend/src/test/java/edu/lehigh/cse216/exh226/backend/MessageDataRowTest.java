@@ -1,6 +1,6 @@
 package edu.lehigh.cse216.exh226.backend;
 
-import edu.lehigh.cse216.exh226.backend.UserDataRow;
+import edu.lehigh.cse216.exh226.backend.MessageDataRow;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
