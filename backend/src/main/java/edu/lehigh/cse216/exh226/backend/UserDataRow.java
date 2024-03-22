@@ -7,6 +7,9 @@ import java.util.Date;
  * NB: This class needs no getter or setters, this is because
  * we use the google Gson library which will convert the instantiation
  * of this class into a JSON object format (which will be sent to frontend)
+ * 
+ * NB: actually we need a getter to get the current password specifically hwne
+ * we login
  */
 
 public class UserDataRow {
@@ -32,5 +35,13 @@ public class UserDataRow {
         mBio = bio;
         mEmail = email;
         mDateCreated = new Date();
+    }
+
+    /**
+     * getPassword() : returns the current password
+     * TECH DEBT: PROBABLY NOT SAFE TO DO THIS
+     */
+    public String getPassword() {
+        return mPassword;
     }
 }

@@ -65,6 +65,13 @@ public class Database {
     private PreparedStatement mSelectAllMessage;
 
     /**
+     * mSelectAllMessage: selects all entry from messageTbl for a specific user
+     * Tech Debt: may make more sense to make them only able to view all of their
+     * own messages
+     */
+    private PreparedStatement mSelectAllMessageForUser;
+
+    /**
      * mUpdateOneMessage: updates one entry from messageTbl, necessary for
      * user to update a message of theirs
      * Tech Debt: When updating a message user should only be able to update theirs
@@ -169,7 +176,8 @@ public class Database {
             // Prepared Statements for messageTbl
             mInsertOneMessage = mConnection.prepareStatement("INSERT INTO messageTbl VALUES (?,?,?,?,0)");
             mSelectOneMessage = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE messageID=?");
-            mSelectAllMessage = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE username=?");
+            mSelectAllMessage = mConnection.prepareStatement("SELECT * FROM messageTbl");
+            mSelectAllMessageForUser = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE username=?");
             mUpdateOneMessage = mConnection.prepareStatement(
                     "UPDATE messageTbl SET title=?,content=? WHERE messageID=?");
             mUpdateOneMessageLikes = mConnection.prepareStatement(
@@ -473,16 +481,39 @@ public class Database {
     }
 
     /**
-     * selectAllMessageTblRow: selects all messages for a specific user
+     * selectAllMessageTblRowForUser: selects all messages for a specific user
      * 
      * @param username : a String for the username
      * 
      * @return : an ArrayList of MessageDataRow objects
      */
-    ArrayList<MessageDataRow> selectAllMessageTblRow(String username) {
+    ArrayList<MessageDataRow> selectAllMessageTblRowForUser(String username) {
         ArrayList<MessageDataRow> res = new ArrayList<MessageDataRow>();
         try {
-            mSelectAllMessage.setString(1, username);
+            mSelectAllMessageForUser.setString(1, username);
+            ResultSet rs = mSelectAllMessageForUser.executeQuery();
+            while (rs.next()) {
+                res.add(new MessageDataRow(rs.getString("username"), rs.getString("messageID"), rs.getString("title"),
+                        rs.getString("content"), rs.getInt("likeCount")));
+            }
+            rs.close();
+            return res;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * selectAllMessageTblRow: selects all messages
+     * 
+     * @param username : a String for the username
+     * 
+     * @return : an ArrayList of MessageDataRow objects
+     */
+    ArrayList<MessageDataRow> selectAllMessageTblRow() {
+        ArrayList<MessageDataRow> res = new ArrayList<MessageDataRow>();
+        try {
             ResultSet rs = mSelectAllMessage.executeQuery();
             while (rs.next()) {
                 res.add(new MessageDataRow(rs.getString("username"), rs.getString("messageID"), rs.getString("title"),

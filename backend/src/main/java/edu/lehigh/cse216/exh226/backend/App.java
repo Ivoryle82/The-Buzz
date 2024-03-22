@@ -106,8 +106,8 @@ public class App {
          * 
          * "http://localhost:4567/"
          */
-        Spark.get("/", (req, res) -> {
-            res.redirect("/index.html");
+        Spark.get("/", (request, response) -> {
+            response.redirect("/index.html");
             return "";
         });
 
@@ -118,7 +118,7 @@ public class App {
          * as a token that authorizes that corresponding user's interactions. Else, do
          * nothing (for now).
          * 
-         * Parameters(data in request.body):
+         * Parameters(data in request.params):
          * username : String
          * password : String
          * 
@@ -129,6 +129,19 @@ public class App {
          * 
          * "http://localhost:4567/login/:username/:password"
          */
+        Spark.get("/login/:username/:password", (request, response) -> {
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            String username = request.params("username");
+            String password = request.params("username");
+            UserDataRow user = db.selectOneUserTblRow(username);
+            if (user.getPassword().equals(password)) {
+                return gson.toJson(new StructuredResponse("ok", null, username));
+            } else {
+                return gson.toJson(new StructuredResponse("error", "failed login", null));
+            }
+        });
 
         /**
          * Route to return all messages (GET). Queries the messageTbl and returns all
@@ -139,6 +152,29 @@ public class App {
          * 
          * "http://localhost:4567/messages"
          */
+        Spark.get("/messages", (request, response) -> {
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            return gson.toJson(new StructuredResponse("ok", null, db.selectAllMessageTblRow()));
+        });
+
+        /**
+         * Route to return all messages for a specific user (GET). Queries the
+         * messageTbl and returns all elements.
+         * 
+         * Parameters(data in request.body):
+         * none
+         * 
+         * "http://localhost:4567/messages:username"
+         */
+        Spark.get("/messages:username", (request, response) -> {
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            String username = request.params("username");
+            return gson.toJson(new StructuredResponse("ok", null, db.selectAllMessageTblRowForUser(username)));
+        });
 
         /**
          * Route to view one message (GET). Queries the messageTbl and returns on
@@ -150,50 +186,108 @@ public class App {
          * 
          * "http://localhost:4567/messages:messageID"
          */
+        Spark.get("/messages:messageID", (request, response) -> {
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            String messageID = request.params("messageID");
+            return gson.toJson(new StructuredResponse("ok", null, db.selectOneMessageTblRow(messageID)));
+        });
 
         /**
          * Route to add one message to messageTbl (POST)
          * 
          * Parameters(data in request.body):
-         * title : String
-         * content : String
-         * username : String
+         * mUsername : String
+         * mMessageID : String
+         * mTitle : String
+         * mContent : String
+         * mLikeCount : int
          * 
          * Parameters(data in request url):
          * messageID : String (this will not be a required parameter after backend makes
          * functionality to update the messageID as a unique int)
          * 
-         * "http://localhost:4567/messages:messageID/add"
+         * "http://localhost:4567/messages/add"
          */
+        Spark.post("/messages:messageID/add", (request, response) -> {
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            String messageID = request.params("messageID");
+            MessageDataRow data = gson.fromJson(request.body(), MessageDataRow.class);
+            int numRows = db.insertMessageTblRow(data.mUsername, messageID, data.mTitle, data.mContent,
+                    data.mLikeCount);
+            return gson.toJson(new StructuredResponse("ok", "total messages: " + numRows, null));
+        });
 
         /**
          * Route to update one message in messageTbl (PUT)
          * 
          * Parameters(data in request.body):
-         * title : String
-         * content : String
-         * username : String
+         * mUsername : String
+         * mTitle : String
+         * mContent : String
          * 
          * Parameters(data in request url):
          * messageID : String (this will not be a required parameter after backend makes
          * functionality to update the messageID as a unique int)
          * 
          * "http://localhost:4567/messages:messageID/edit"
+         */
+        Spark.put("/messages:messageID/edit", (request, response) -> {
+            String messageID = request.params("messageID");
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+
+            MessageRequest reqData = gson.fromJson(request.body(), MessageRequest.class);
+            MessageDataRow msgData = db.selectOneMessageTblRow(messageID);
+            if (reqData.mUsername.equals(msgData.mUsername)) {
+                int numRows = db.updateOneMessageTblRow(messageID, reqData.mTitle, reqData.mContent);
+                return gson.toJson(new StructuredResponse("ok", "total messages: " + numRows, null));
+            } else {
+                return gson.toJson(new StructuredResponse("error", "tried to edit a message that wasnt yours", null));
+            }
+        });
+
+        /**
+         * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+         * SOMETHING VERY IMPORTANT
+         * THE JSON KEYS IN FOR THE DATA MUST MATCH THE VARIABLE NAMES OF THE CLASS
+         * OBJECT THE GSON LIBRARY IS PARSING THAT JSON DATA TO
+         * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
          */
 
         /**
          * Route to delete one message in messageTbl (DELETE)
          * 
          * Parameters(data in request.body):
-         * username : String, this is so a user can only delete his messages. SO this
+         * mUsername : String, this is so a user can only delete his messages. SO this
          * must match the token given at login.
          * 
          * Parameters(data in request url):
          * messageID : String (this will not be a required parameter after backend makes
          * functionality to update the messageID as a unique int)
          * 
-         * "http://localhost:4567/messages:messageID/edit"
+         * "http://localhost:4567/messages:messageID/delete"
          */
+        Spark.delete("/messages:messageID/delete", (request, response) -> {
+            // If we can't get an ID, Spark will send a status 500
+            String messageID = request.params("messageID");
+            // ensure status 200 OK, and MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            MessageRequest reqData = gson.fromJson(request.body(), MessageRequest.class);
+            MessageDataRow msgData = db.selectOneMessageTblRow(messageID);
+
+            int result = db.deleteOneMessageTblRow(messageID);
+            if (result == -1) {
+                return gson.toJson(new StructuredResponse("error", "unable to delete row " + messageID, null));
+            } else {
+                return gson.toJson(new StructuredResponse("ok", null, null));
+            }
+        });
 
         /**
          * Route to like or unlike a message (PUT)
@@ -208,6 +302,16 @@ public class App {
          * 
          * "http://localhost:4567/messages:messageID/like"
          */
+        Spark.put("/messages:messageID/like", (request, response) -> {
+            String messageID = request.params("messageID");
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+
+            JsonObject username = gson.fromJson(request.body(), MessageRequest.class); // because
+            int numRows = db.updateOneMessageTblRow(messageID, reqData.mTitle, reqData.mContent);
+            return gson.toJson(new StructuredResponse("ok", "total messages: " + numRows, null));
+        });
 
         /**
          * Route to view user profile (GET)
