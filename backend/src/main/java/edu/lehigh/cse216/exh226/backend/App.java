@@ -137,7 +137,7 @@ public class App {
             response.status(200);
             response.type("application/json");
             String username = request.params("username");
-            String password = request.params("username");
+            String password = request.params("password");
             UserDataRow user = db.selectOneUserTblRow(username);
             if (user.getPassword().equals(password)) {
                 return gson.toJson(new StructuredResponse("ok", null, username));
