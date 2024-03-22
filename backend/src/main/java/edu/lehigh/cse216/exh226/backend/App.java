@@ -118,6 +118,9 @@ public class App {
          * as a token that authorizes that corresponding user's interactions. Else, do
          * nothing (for now).
          * 
+         * Parameters(data in request.body):
+         * none
+         * 
          * Parameters(data in request.params):
          * username : String
          * password : String
@@ -142,6 +145,73 @@ public class App {
                 return gson.toJson(new StructuredResponse("error", "failed login", null));
             }
         });
+
+        /**
+         * Route to view user profile (GET)
+         * 
+         * Parameters(data in request.body):
+         * none
+         * 
+         * Parameters(data in request url):
+         * username : String
+         * 
+         * "http://localhost:4567/userprofiles:username"
+         */
+        Spark.get("/userprofiles:username", (request, response) -> {
+            String username = request.params("username");
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            return gson.toJson(new StructuredResponse("ok", null, db.selectOneUserTblRow(username)));
+        });
+
+        /**
+         * Route to update user profile (PUT)
+         * 
+         * Parameters(data in request.body):
+         * mUsername : String
+         * newUsername : String
+         * newPassword : String
+         * newBio : String
+         * newEmail : String
+         * 
+         * Parameters(data in request url):
+         * username : String, (this is used for authentication, we will change this
+         * later)
+         * 
+         * "http://localhost:4567/userprofiles:username/edit"
+         * 
+         * TECH DEBT: username passed like this has many flaws, plz read everything I
+         * wrote about Tech Debt of create authentication token
+         */
+        Spark.put("/userprofiles:username/edit", (request, response) -> {
+            String username = request.params("messageID");
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+
+            MessageRequest reqData = gson.fromJson(request.body(), MessageRequest.class);
+            MessageDataRow msgData = db.selectOneMessageTblRow(messageID);
+            if (reqData.mUsername.equals(msgData.mUsername)) {
+                int numRows = db.updateOneMessageTblRow(messageID, reqData.mTitle, reqData.mContent);
+                return gson.toJson(new StructuredResponse("ok", "total messages: " + numRows, null));
+            } else {
+                return gson.toJson(new StructuredResponse("error", "tried to edit a message that wasnt yours", null));
+            }
+        });
+
+        /**
+         * Route to delete user profile (DELETE)
+         * 
+         * Parameters(data in request.body):
+         * none
+         * 
+         * Parameters(data in request url):
+         * username : String, (this is used for authentication, we will change this
+         * later)
+         * 
+         * "http://localhost:4567/userprofiles:username/delete"
+         */
 
         /**
          * Route to return all messages (GET). Queries the messageTbl and returns all
@@ -241,7 +311,7 @@ public class App {
             response.status(200);
             response.type("application/json");
 
-            MessageRequest reqData = gson.fromJson(request.body(), MessageRequest.class);
+            MessageDataRow reqData = gson.fromJson(request.body(), MessageDataRow.class);
             MessageDataRow msgData = db.selectOneMessageTblRow(messageID);
             if (reqData.mUsername.equals(msgData.mUsername)) {
                 int numRows = db.updateOneMessageTblRow(messageID, reqData.mTitle, reqData.mContent);
@@ -278,14 +348,13 @@ public class App {
             // ensure status 200 OK, and MIME type of JSON
             response.status(200);
             response.type("application/json");
-            MessageRequest reqData = gson.fromJson(request.body(), MessageRequest.class);
-            MessageDataRow msgData = db.selectOneMessageTblRow(messageID);
+            String reqUsername = gson.fromJson(request.body(), MessageDataRow.class).mUsername;
+            String msgUsername = db.selectOneMessageTblRow(messageID).mUsername;
 
-            int result = db.deleteOneMessageTblRow(messageID);
-            if (result == -1) {
-                return gson.toJson(new StructuredResponse("error", "unable to delete row " + messageID, null));
+            if (reqUsername.equals(msgUsername)) {
+                return db.deleteOneMessageTblRow(messageID);
             } else {
-                return gson.toJson(new StructuredResponse("ok", null, null));
+                return gson.toJson(new StructuredResponse("error", "unable to delete row (not your message)", null));
             }
         });
 
@@ -303,62 +372,27 @@ public class App {
          * "http://localhost:4567/messages:messageID/like"
          */
         Spark.put("/messages:messageID/like", (request, response) -> {
+            int result;
             String messageID = request.params("messageID");
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
 
-            JsonObject username = gson.fromJson(request.body(), MessageRequest.class); // because
-            int numRows = db.updateOneMessageTblRow(messageID, reqData.mTitle, reqData.mContent);
-            return gson.toJson(new StructuredResponse("ok", "total messages: " + numRows, null));
+            String username = gson.fromJson(request.body(), MessageDataRow.class).mUsername;
+            int likeCount = db.selectOneMessageTblRow(messageID).mLikeCount;
+            UserLikesDataRow userLikesData = db.selectOneUserLikesTblRow(username, messageID);
+
+            if (userLikesData == null) { // we haven't liked the message yet
+                likeCount++;
+                result = db.updateOneMessageTblRowLikes(messageID, likeCount);
+            } else {
+                likeCount--;
+                result = db.updateOneMessageTblRowLikes(messageID, likeCount);
+            }
+
+            return gson.toJson(new StructuredResponse("ok", "total likes: " + result, null));
         });
-
-        /**
-         * Route to view user profile (GET)
-         * 
-         * Parameters(data in request.body):
-         * none
-         * 
-         * Parameters(data in request url):
-         * username : String
-         * 
-         * "http://localhost:4567/userprofiles:username"
-         */
-
-        /**
-         * Route to update user profile (PUT)
-         * 
-         * Parameters(data in request.body):
-         * newUsername : String
-         * newPassword : String
-         * newBio : String
-         * newEmail : String
-         * 
-         * Parameters(data in request url):
-         * username : String, (this is used for authentication, we will change this
-         * later)
-         * 
-         * "http://localhost:4567/userprofiles:username/edit"
-         * 
-         * TECH DEBT: username passed like this has many flaws, plz read everything I
-         * wrote about Tech Debt of create authentication token
-         */
-
-        /**
-         * Route to delete user profile (DELETE)
-         * 
-         * Parameters(data in request.body):
-         * none
-         * 
-         * Parameters(data in request url):
-         * username : String, (this is used for authentication, we will change this
-         * later)
-         * 
-         * "http://localhost:4567/userprofiles:username/delete"
-         */
-
     }
-
 }
 
 /**
