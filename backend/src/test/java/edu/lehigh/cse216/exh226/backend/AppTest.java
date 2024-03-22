@@ -31,11 +31,4 @@ public class AppTest
     public void testApp() {
         assertTrue(true);
     }
-
-    // /**
-    // * Failing test case
-    // */
-    // public void testWillFail() {
-    // assertFalse(true);
-    // }
 }
