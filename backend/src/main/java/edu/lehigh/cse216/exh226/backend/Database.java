@@ -252,8 +252,9 @@ public class Database {
         // Give the Database object a connection, fail if we cannot get one
         try {
             String dbUrl = "jdbc:postgresql://" + host + ":" + port + path;
-            // System.out.printf("TEST: %s", user);
-            // System.out.printf("TEST: %s", pass);
+            System.out.printf("TEST: %s\n", dbUrl);
+            System.out.printf("TEST: %s\n", user);
+            System.out.printf("TEST: %s\n", pass);
             Connection conn = DriverManager.getConnection(dbUrl, user, pass);
             if (conn == null) {
                 System.err.println("Error: DriverManager.getConnection() returned a null object");
@@ -283,6 +284,8 @@ public class Database {
     static Database getDatabase(String db_url, String port_default) {
         try {
             URI dbUri = new URI(db_url);
+            System.out.println("TESTING dbURI: " + dbUri.getUserInfo() + "\n");
+            System.out.println("TESTING dbURI: " + dbUri.getPort() + "\n");
             String username = dbUri.getUserInfo().split(":")[0];
             String password = dbUri.getUserInfo().split(":")[1];
             String host = dbUri.getHost();

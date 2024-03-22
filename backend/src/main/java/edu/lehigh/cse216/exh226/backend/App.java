@@ -18,7 +18,9 @@ import java.util.Map;
  */
 public class App {
 
-    private static final String DEFAULT_URL_DB = "";
+    // private static final String DEFAULT_URL_DB = "";
+    // WE NEVER STORE THE DATABASE URL IN THE APP, THAT WOULD LEAK OUR PASSWORD
+    // GIVING ANYBODY CONTROL OVER ALL ACTIONS IN OUR DATABASE
     private static final String DEFAULT_PORT_DB = "5432";
     private static final int DEFAULT_PORT_SPARK = 4567;
 
@@ -33,7 +35,7 @@ public class App {
      */
     private static Database getDataBaseConnection() {
         if (System.getenv("DATABASE_URL") != null) {
-            return Database.getDatabase(System.getenv("DATABASE_URL"), DEFAULT_URL_DB);
+            return Database.getDatabase(System.getenv("DATABASE_URL"), DEFAULT_PORT_DB);
         }
         Map<String, String> env = System.getenv();
         String ip = env.get("POSTGRES_IP");
