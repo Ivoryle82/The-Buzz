@@ -114,6 +114,34 @@ public class App {
         });
 
         /**
+         * Route for signing up (POST). Creates a new entry in the userTbl.
+         * Does not return any data to the front end.
+         * TECH DEBT: After sign up it should return a token that is similar to the
+         * login token.
+         * 
+         * Parameters(data in request.body):
+         * mBio : A String for the bio
+         * mEmail : A String for the email
+         * 
+         * Parameters(data in request.params):
+         * username : String
+         * password : String
+         */
+        Spark.post("/signup/:username/:password", (request, response) -> {
+            // Ensure status of 200 OK, with a MIME type of JSON
+            response.status(200);
+            response.type("application/json");
+            String username = request.params("username");
+            String password = request.params("password");
+            UserDataRow userData = gson.fromJson(request.body(), UserDataRow.class);
+            String bio = userData.mBio;
+            String email = userData.mEmail;
+
+            int numUsersAdded = db.insertUserTblRow(username, password, bio, email);
+            return gson.toJson(new StructuredResponse("ok", "number of users added: " + numUsersAdded, null));
+        });
+
+        /**
          * Route for logging in (GET). Queries the userTbl to see if the password
          * matches
          * with the username. If it does, return the username to the front-end. Serving
