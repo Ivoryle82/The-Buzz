@@ -11,8 +11,8 @@ var $: any;
 //NOTE: THIS IS THE SINGLETON PATTERN I BELIEVE
 var newEntryForm: NewEntryForm;
 
-// This constant indicates the path to our backend server (hosted on dokku)
-const backendUrl = "https://2024sp-tutorial-exh226.dokku.cse.lehigh.edu";
+// // This constant indicates the path to our backend server (hosted on dokku)
+// const backendUrl = "https://2024sp-tutorial-exh226.dokku.cse.lehigh.edu";
 
 /**
  * NewEntryForm encapsulated all of the code for the form for adding an entry
@@ -56,7 +56,7 @@ class NewEntryForm {
         //set up AJAX
         //Do a POST. When the server replies, the result will go to onSubmitResponse
         const doAjax = async () => {
-            await fetch(`${backendUrl}/messages`, {
+            await fetch(`/messages`, {
                 method: 'POST',
                 body: JSON.stringify({
                     mTitle: title,
@@ -117,7 +117,7 @@ class ElementList {
     refresh() {
         // Issue an AJAX GET and then pass the result to update().
         const doAjax = async () => {
-            await fetch(`${backendUrl}/messages`, {
+            await fetch(`/messages`, {
                 method: 'GET',
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8'
@@ -222,7 +222,7 @@ class ElementList {
 
         //Issue an AJAX DELETE and then invoke refresh()
         const doAjax = async () => {
-            await fetch(`${backendUrl}/messages/${id}`, {
+            await fetch(`/messages/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8'
@@ -259,7 +259,7 @@ class ElementList {
 
         // Issue an AJAX GET and then pass the result to editEntryForm.init()
         const doAjax = async () => {
-            await fetch(`${backendUrl}/messages/${id}`, {
+            await fetch(`/messages/${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8'
@@ -356,7 +356,7 @@ class EditEntryForm {
         // set up an AJAX PUT.
         // When the server replies, the result will go to onSubmitResponse
         const doAjax = async () => {
-            await fetch(`${backendUrl}/messages/${id}`, {
+            await fetch(`/messages/${id}`, {
                 method: 'PUT',
                 body: JSON.stringify({
                     mTitle: title,
