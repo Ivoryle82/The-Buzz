@@ -409,7 +409,7 @@ public class App {
          * Route to like or unlike a message (PUT)
          * 
          * Parameters(data in request.body):
-         * username : String, this is so a user can only delete his messages. SO this
+         * mUsername : String, this is so a user can only delete his messages. SO this
          * must match the token given at login.
          * 
          * Parameters(data in request url):
