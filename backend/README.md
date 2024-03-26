@@ -16,3 +16,5 @@ Current Backend - Evan
 
 * Current ERD diagram:
 ![Alt text](ERD_3-24-2024.png)
+
+# Deploying to dokku : Tech Debt

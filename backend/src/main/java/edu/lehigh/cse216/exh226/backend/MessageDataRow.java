@@ -10,7 +10,7 @@ import java.util.Date;
  */
 
 public class MessageDataRow {
-    public String mMessageID; // the messageID (unique primary key) (this will be an int later)
+    public int mMessageID; // the messageID (unique primary key) (this will be an int later)
     public String mUsername; // the username (unique foreign key)
     public String mTitle; // the message's title
     public String mContent; // the message's content
@@ -28,7 +28,7 @@ public class MessageDataRow {
      * 
      * @return : a MessageDataRow object
      */
-    MessageDataRow(String messageID, String username, String title, String content, int likeCount) {
+    MessageDataRow(String username, int messageID, String title, String content, int likeCount) {
         mMessageID = messageID;
         mUsername = username;
         mTitle = title;

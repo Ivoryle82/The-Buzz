@@ -30,10 +30,10 @@ public class UserLikesDataRowTest extends TestCase {
      */
     public void testConstructor() {
         String username = "testing username"; // the username
-        String messageID = "testing messageID"; // the messageID
+        int messageID = 456; // the messageID
         UserLikesDataRow testUserLikesDataRow = new UserLikesDataRow(username, messageID);
         assertTrue(testUserLikesDataRow.mUsername.equals(username));
-        assertTrue(testUserLikesDataRow.mMessageID.equals(messageID));
+        assertTrue(testUserLikesDataRow.mMessageID == messageID);
         assertFalse(testUserLikesDataRow.mDateCreated == null); // because this is automatically created, if it is null
         // something went wrong
     }
