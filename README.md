@@ -28,4 +28,4 @@ This is a team repository.  It is intended for use during phase 1 and beyond.
 - ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'ps:start cse216_sp24_team_09'
 
 ## Admin Instructions
-- POSTGRES_IP=tiny.db.elephantsql.com POSTGRES_PORT=5432 POSTGRES_USER=syldyaly POSTGRES_PASS=dV4x4m4VuM9WWQ2qHkkwU46bi8CmwMwp
+- POSTGRES_IP=jelani.db.elephantsql.com POSTGRES_PORT=5432 POSTGRES_USER=zpzzdvck POSTGRES_PASS=bB7p6OwexymsYGtZphn1VxrD8TX-zk27

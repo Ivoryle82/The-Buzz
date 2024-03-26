@@ -1,4 +1,4 @@
-package edu.lehigh.cse216.team9.hhl226.admin;
+package edu.lehigh.cse216.team09.exh226.admin;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -66,7 +66,6 @@ public class App {
         }
         return i;
     }
-
     public static void main(String[] argv) {
         Map<String, String> env = System.getenv();
         String ip = env.get("POSTGRES_IP");
