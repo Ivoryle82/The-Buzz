@@ -25,6 +25,39 @@ public class App {
     private static final int DEFAULT_PORT_SPARK = 4567;
 
     /**
+     * Set up CORS headers for the OPTIONS verb, and for every response that the
+     * server sends. This only needs to be called once.
+     * 
+     * @param origin  The server that is allowed to send requests to this server
+     * @param methods The allowed HTTP verbs from the above origin
+     * @param headers The headers that can be sent with a request from the above
+     *                origin
+     */
+    private static void enableCORS(String origin, String methods, String headers) {
+        // Create an OPTIONS route that reports the allowed CORS headers and methods
+        Spark.options("/*", (request, response) -> {
+            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
+            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+            if (accessControlRequestMethod != null) {
+                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
+            return "OK";
+        });
+
+        // 'before' is a decorator, which will run before any
+        // get/post/put/delete. In our case, it will put three extra CORS
+        // headers into the response
+        Spark.before((request, response) -> {
+            response.header("Access-Control-Allow-Origin", origin);
+            response.header("Access-Control-Request-Method", methods);
+            response.header("Access-Control-Allow-Headers", headers);
+        });
+    }
+
+    /**
      * getDataBaseConnection() : establishes a connection to the database provided
      * by the DATABASE_URL enviornment variables, or using separate environment
      * variables that hold the fields of the DATABASE_URL
@@ -53,7 +86,7 @@ public class App {
      * @param defaultVal : an int, the default integer value to use for the port if
      *                   envar is not found.
      * 
-     * @returns : an int, either the defaultVal, or the value stored at envar tst
+     * @returns : an int, either the defaultVal, or the value stored at envar
      */
     static int getIntFromEnv(String envar, int defaultVal) {
         ProcessBuilder processBuilder = new ProcessBuilder();
@@ -100,6 +133,16 @@ public class App {
             Spark.staticFileLocation("/web");
         } else {
             Spark.staticFiles.externalLocation(static_location_override);
+        }
+
+        /**
+         * Enable CORS, MUST BE DONE BEFORE SETTING UP ROUTES
+         */
+        if ("True".equalsIgnoreCase(System.getenv("CORS_ENABLED"))) {
+            final String acceptCrossOriginRequestsFrom = "*";
+            final String acceptedCrossOriginRoutes = "GET,PUT,POST,DELETE,OPTIONS";
+            final String supportedRequestHeaders = "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin";
+            enableCORS(acceptCrossOriginRequestsFrom, acceptedCrossOriginRoutes, supportedRequestHeaders);
         }
 
         /**
@@ -409,7 +452,7 @@ public class App {
          * Route to like or unlike a message (PUT)
          * 
          * Parameters(data in request.body):
-         * username : String, this is so a user can only delete his messages. SO this
+         * mUsername : String, this is so a user can only delete his messages. SO this
          * must match the token given at login.
          * 
          * Parameters(data in request url):
