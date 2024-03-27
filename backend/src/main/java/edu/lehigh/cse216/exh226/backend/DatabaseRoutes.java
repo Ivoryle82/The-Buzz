@@ -5,10 +5,9 @@ import com.google.gson.Gson;
 import edu.lehigh.cse216.exh226.backend.controllers.InteractionController;
 import edu.lehigh.cse216.exh226.backend.controllers.MessageController;
 import edu.lehigh.cse216.exh226.backend.controllers.UserController;
-import edu.lehigh.cse216.exh226.backend.fields.User;
+import edu.lehigh.cse216.exh226.backend.fields.*;
 import edu.lehigh.cse216.exh226.backend.requests.*;
-import edu.lehigh.cse216.exh226.backend.fields.Interaction;
-import edu.lehigh.cse216.exh226.backend.fields.Message;
+
 import spark.Spark;
 
 /*Updated By Sam Maloof
