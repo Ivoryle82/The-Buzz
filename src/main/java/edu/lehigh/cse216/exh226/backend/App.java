@@ -53,7 +53,7 @@ public class App {
      * @param defaultVal : an int, the default integer value to use for the port if
      *                   envar is not found.
      * 
-     * @returns : an int, either the defaultVal, or the value stored at envar
+     * @returns : an int, either the defaultVal, or the value stored at envar tst
      */
     static int getIntFromEnv(String envar, int defaultVal) {
         ProcessBuilder processBuilder = new ProcessBuilder();
