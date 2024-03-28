@@ -230,7 +230,7 @@ public class App {
          * 
          * "http://localhost:4567/userprofiles:username"
          */
-        Spark.get("/userprofiles/:username", (request, response) -> {
+        Spark.get("/userprofiles:username", (request, response) -> {
             String username = request.params("username");
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
@@ -251,12 +251,12 @@ public class App {
          * Parameters(data in request url):
          * username : String
          * 
-         * "http://localhost:4567/userprofiles/:username"
+         * "http://localhost:4567/userprofiles:username/edit"
          * 
          * TECH DEBT: username passed like this has many flaws, plz read everything I
          * wrote about Tech Debt of creating an authentication token
          */
-        Spark.put("/userprofiles/:username", (request, response) -> {
+        Spark.put("/userprofiles:username/edit", (request, response) -> {
             String username = request.params("username");
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
@@ -283,9 +283,9 @@ public class App {
          * Parameters(data in request url):
          * username : String
          * 
-         * "http://localhost:4567/userprofiles/:username"
+         * "http://localhost:4567/userprofiles:username/delete"
          */
-        Spark.delete("/userprofiles/:username", (request, response) -> {
+        Spark.delete("/userprofiles:username/delete", (request, response) -> {
             String username = request.params("username");
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
@@ -325,9 +325,9 @@ public class App {
          * Parameters(data in request.body):
          * none
          * 
-         * "http://localhost:4567/messages/msgsByUser/:username"
+         * "http://localhost:4567/messages:username"
          */
-        Spark.get("/messages/msgsByUser/:username", (request, response) -> {
+        Spark.get("/messages:username", (request, response) -> {
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
@@ -346,9 +346,9 @@ public class App {
          * Parameters(data in request url):
          * messageID : String
          * 
-         * "http://localhost:4567/messages/:messageID"
+         * "http://localhost:4567/messages:messageID"
          */
-        Spark.get("/messages/:messageID", (request, response) -> {
+        Spark.get("/messages:messageID", (request, response) -> {
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
@@ -368,9 +368,9 @@ public class App {
          * None
          * functionality to update the messageID as a unique int)
          * 
-         * "http://localhost:4567/messages"
+         * "http://localhost:4567/messages/add"
          */
-        Spark.post("/messages", (request, response) -> {
+        Spark.post("/messages/add", (request, response) -> {
             // Ensure status of 200 OK, with a MIME type of JSON
             int maximumMessageID = db.selectMaxMessageID() + 1;
             response.status(200);
@@ -393,9 +393,9 @@ public class App {
          * messageID : String (this will not be a required parameter after backend makes
          * functionality to update the messageID as a unique int)
          * 
-         * "http://localhost:4567/messages/:messageID"
+         * "http://localhost:4567/messages:messageID/edit"
          */
-        Spark.put("/messages/:messageID", (request, response) -> {
+        Spark.put("/messages:messageID/edit", (request, response) -> {
             int messageID = Integer.parseInt(request.params("messageID"));
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
@@ -430,12 +430,9 @@ public class App {
          * messageID : String (this will not be a required parameter after backend makes
          * functionality to update the messageID as a unique int)
          * 
-         * "http://localhost:4567/messages/:messageID"
-         * 
-         * Tech Debt: Refactor the routes to have a / before parameters and also take
-         * the verbs out of the uri
+         * "http://localhost:4567/messages:messageID/delete"
          */
-        Spark.delete("/messages/:messageID", (request, response) -> {
+        Spark.delete("/messages:messageID/delete", (request, response) -> {
             // If we can't get an ID, Spark will send a status 500
             int messageID = Integer.parseInt(request.params("messageID"));
             // ensure status 200 OK, and MIME type of JSON
@@ -462,9 +459,9 @@ public class App {
          * messageID : String (this will not be a required parameter after backend makes
          * functionality to update the messageID as a unique int)
          * 
-         * "http://localhost:4567/messages/:messageID/like"
+         * "http://localhost:4567/messages:messageID/like"
          */
-        Spark.put("/messages/:messageID/like", (request, response) -> {
+        Spark.put("/messages:messageID/like", (request, response) -> {
             int result;
             int messageID = Integer.parseInt(request.params("messageID"));
             // Ensure status of 200 OK, with a MIME type of JSON
