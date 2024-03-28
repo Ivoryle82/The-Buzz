@@ -12,15 +12,15 @@ This is a team repository.  It is intended for use during phase 1 and beyond.
 - Release 0.0
 
 ## Team Members
-- Sam Maloof (Backend)
+- Sam Maloof 
 *sjm225@lehigh.edu
-- Evan Hu (Project Manager)
+- Evan Hu 
 *exh226@lehigh.edu
-- Jialin Lin (Web Front End)
+- Jialin Lin 
 *jil426@lehigh.edu
-- Zander Fahs (Mobile)
+- Zander Fahs 
 *zah326@lehigh.edu
-- Ivory Le (Admin)
+- Ivory Le 
 *hhl226@lehigh.edu
 
 
@@ -44,3 +44,6 @@ To Load Others Changes into your local repository:
 1. ```git fetch origin 'branch name'``` or ```git pull origin 'branch name'```
 2. This loads the changes other people made to the branch into your local branch
 3. Note: you will probably have resolve conflicts. Be careful when selecting what changes to (add/not add)
+
+# Updated Paths for Website
+- 
