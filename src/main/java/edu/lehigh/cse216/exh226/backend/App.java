@@ -477,9 +477,14 @@ public class App {
 
             if (userLikesData == null) { // we haven't liked the message yet
                 likeCount++;
+                /**
+                 * Change this in the backend aswell
+                 */
+                db.insertUserLikesTblRow(username, messageID);
                 result = db.updateOneMessageTblRowLikes(messageID, likeCount);
             } else {
                 likeCount--;
+                db.deleteOneUserLikesTblRow(username, messageID);
                 result = db.updateOneMessageTblRowLikes(messageID, likeCount);
             }
 
