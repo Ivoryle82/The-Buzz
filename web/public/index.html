@@ -1,134 +1,25 @@
+<!-- dont touch this file -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="app.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Buzz</title>
-    <!-- Preconnect to Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Import the "DM Serif Display" font -->
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-    <style>
-        body {
-          margin: 0;
-          padding: 0; /*background-image: url('thebuzz.png'); */
-          background-repeat: no-repeat;
-          background-size: cover; /* Cover the entire background */
-          background-position: center; /* Center the background image */
-          min-height: 100vh; /* Ensure the body takes up at least the full height of the viewport */
-          position: relative; /* Set body position to relative */
-        }
-
-        .header {
-            background-color: black;
-            color: white;
-            padding: 10px; /* Adjusted padding for smaller header */
-            text-align: left;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-family: 'DM Serif Display', serif; /* Use the 'DM Serif Display' font family */
-            color: orange;
-            font-size: 40px; /* Adjusted font size for smaller header */
-            text-align: center;
-            margin: 0;
-        }
-
-        .footer {
-            background-color: black;
-            color: white;
-            padding: 10px; /* Adjusted padding for smaller footer */
-            text-align: center;
-            position: fixed; /* Set footer position to fixed */
-            bottom: 0; /* Position the footer at the bottom of the viewport */
-            width: 100%; /* Ensure the footer spans the full width of the viewport */
-        }
-
-        .footer h1 {
-            font-family: 'DM Serif Display', serif; /* Use the 'DM Serif Display' font family */
-            color: orange;
-            font-size: 20px; /* Adjusted font size for smaller footer */
-            margin: 0;
-        }
-
-        /* Style the greeting paragraph */
-        #greeting {
-            font-family: 'DM Serif Display', serif;
-            font-size: 48px; /* Set the font size to make it big */
-            color: orange; /* Set the text color to orange */
-            text-align: center; /* Center the text horizontally */
-        }
-    </style>
+    <!-- Add your CSS file if you have one -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body onload="changeWebsiteName()">
-    <p id="greeting">The Buzz</p>
-    <div class="header">
-        <h1 id="websiteName">The Buzz</h1>
-    </div>
+<body>
 
+
+<main>
+    <!-- Your main content goes here -->
+    <!-- Add a div with an ID of "root" for React to render into -->
     <div id="root"></div>
+</main>
 
-    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.development.js"></script>
-    <!-- Your App.js script (transpiled) -->
-    <!-- <script src="../src/App.js"></script> -->
-    <div id="addElement">
-        <h3>Add a New Entry</h3>
-        <label>Title</label>
-        <input type="text" id="newTitle" />
-        <label>Message</label>
-        <textarea id="newMessage"></textarea>
-        <button id="addButton">Add</button>
-        <button id="addCancel">Cancel</button>
-      </div>
-      <div id="editElement">
-        <h3>Edit an Entry</h3>
-        <label>Title</label>
-        <input type="text" id="editTitle" />
-        <label>Message</label>
-        <textarea id="editMessage"></textarea>
-        <span id="editCreated"></span>
-        <input type="hidden" id="editId" />
-        <button id="editButton">Update</button>
-        <button id="editCancel">Cancel</button>
-      </div>
-      <div id="showElements">
-        <h3>All Messages</h3>
-        <button id="showFormButton">Add Message</button>
-        <div id="messageList"></div>
-      </div>
 
-    <script>
-        
-        // Function to change the text of the website name
-        function changeWebsiteName() {
-            document.getElementById("greeting").innerHTML = "";
-        }
-        window.addEventListener('load', function() {
-            fetch('/messages')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Received data:', data);
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                });
-        });
-    </script>
+<!-- Add your JavaScript bundle (compiled React code) -->
+<script src="path/to/your/bundle.js"></script>
 
-    <div class="footer">
-      <h1>Team Goku @2024</h1>
-  </div>
 </body>
 </html>

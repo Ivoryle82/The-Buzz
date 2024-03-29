@@ -4,6 +4,8 @@ import spark.Spark; // Import the Spark package, so we can use the get function 
 
 import com.google.gson.*; // Import Google's JSON library
 
+import static spark.Spark.*;// Import Spark to handle CORS
+
 import edu.lehigh.cse216.exh226.backend.controllers.*;
 //import edu.lehigh.cse216.exh226.backend.DatabaseRoutes;
 import java.util.Map;
@@ -72,6 +74,28 @@ public class App {
      * @param args : unused argument
      */
     public static void main(String[] args) {
+
+         // Set up CORS headers for all routes
+         options("/*", (request, response) -> {
+            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
+
+            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+            if (accessControlRequestMethod != null) {
+                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
+
+            return "OK";
+        });
+
+        before((request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Request-Method", "*");
+            response.header("Access-Control-Allow-Headers", "*");
+        });
+        
         // Set the port on which to listen for requests from localhost
         Spark.port(getIntFromEnv("PORT", DEFAULT_PORT_SPARK));
 

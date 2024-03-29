@@ -22,11 +22,3 @@ mkdir $TARGETFOLDER/$WEBFOLDERNAME
 # there are many more steps to be done.  For now, we will just copy an HTML file
 echo "copying index.html to $TARGETFOLDER/$WEBFOLDERNAME/index.html"
 cp public/index.html $TARGETFOLDER/$WEBFOLDERNAME/index.html
-
-# step 2: update our npm dependencies
-echo "updating npm dependencies"
-npm update
-
-# step 5: compile TypeScript files
-echo "Compiling typescript files"
-node_modules/typescript/bin/tsc app.ts --strict --outFile $TARGETFOLDER/$WEBFOLDERNAME/app.js
