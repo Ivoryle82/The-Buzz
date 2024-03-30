@@ -28,7 +28,7 @@ const style = {
 
 function App() {
   const [openModal, setOpenModal] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editModalOpen, setEditModal] = useState(false);
   const [titleInput, setTitleInput] = useState('');
   const [userInput, setUserInput] = useState('');
   const [editIndex, setEditIndex] = useState(null);
@@ -74,7 +74,7 @@ function App() {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch('https://team-goku.dokku.cse.lehigh.edu/messages/add', {
+      const response = await fetch('https://team-goku.dokku.cse.lehigh.edu/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,119 +98,105 @@ function App() {
       console.error('Error posting message:', error);
     }
   };
-  
+
   const handleLikeToggle = async (index) => {
     try {
-        // Get the message object at the specified index
-        const message = messages[index];
-        
-        // Send PUT request to toggle like using the message's mMessageID
-        const response = await fetch(`https://team-goku.dokku.cse.lehigh.edu/messages/:${message.mMessageID}/like`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ action: 'like' }) // Include payload indicating the action
-      
-        }); 
-        
-        // Check if request was successful
+      const message = messages[index];
+      if (message) {
+        const { mMessageID, mUsername } = message;
+        const response = await fetch(`https://team-goku.dokku.cse.lehigh.edu/messages/${mMessageID}/like`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            mUsername: mUsername,
+          }),
+        });
         if (!response.ok) {
-            console.log(response)
-            throw new Error('Failed to toggle like');
+          throw new Error('Failed to toggle like');
         }
-        
-        // Parse response JSON if necessary (depends on server response format)
         const data = await response.json();
-        
-        // Update UI or perform any necessary actions based on response
         console.log('Response from server:', data);
+      } else {
+        console.error('Message not found');
+      }
     } catch (error) {
-        // Handle errors
-        console.error('Error toggling like:', error);
-    }
-};
-
-
-  
-  const handleEdit = (index) => {
-    if (messages[index]) {
-      setEditIndex(index);
-      setTitleInput(messages[index].mTitle);
-      setUserInput(messages[index].mContent);
-      setEditModalOpen(true);
-    } else {
-      console.error(`Message at index ${index} does not exist`);
+      console.error('Error toggling like:', error);
     }
   };
-  
-  const handleEditSubmit = async () => {
+
+  const handleDelete = async (index) => {
     try {
-      const response = await fetch(`https://team-goku.dokku.cse.lehigh.edu/messages/edit/${messages[editIndex].mMessageID}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mTitle: titleInput,
-          mContent: userInput,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to update message');
+      const message = messages[index];
+      if (message) {
+        const { mMessageID, mUsername } = message;
+        const response = await fetch(`https://team-goku.dokku.cse.lehigh.edu/messages/${mMessageID}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            mUsername: mUsername,
+          }),
+        });
+        if (!response.ok) {
+          throw new Error('Failed to delete message');
+        }
+        const data = await response.json();
+        console.log('Response from server:', data);
+        const updatedMessages = messages.filter((msg, idx) => idx !== index);
+        setMessages(updatedMessages);
+      } else {
+        console.error('Message not found');
       }
-      const data = await response.json();
-      console.log('Response from server:', data);
-      setTitleInput('');
-      setUserInput('');
-      setEditIndex(null);
-      setEditModalOpen(false);
-      fetchMessages();
+    } catch (error) {
+      console.error('Error deleting message:', error);
+    }
+  };
+
+  const handleEdit = async (index) => {
+    try {
+      const message = messages[index];
+      console.log(message);
+      if (message) {
+        const { mMessageID, mUsername } = message; // Extracting necessary properties from the message object
+  
+        const response = await fetch(`https://team-goku.dokku.cse.lehigh.edu/messages/${mMessageID}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            mUsername: mUsername,
+            mTitle: titleInput,
+            mContent: userInput,
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to update message');
+        }
+  
+        const data = await response.json();
+        console.log('Response from server:', data);
+  
+        // Clear input fields and close the modal after successful update
+        setTitleInput('');
+        setUserInput('');
+        setEditIndex(null);
+        setEditModal(false);
+  
+        // Fetch updated messages
+        fetchMessages();
+      } else {
+        console.error(`Message at index ${index} does not exist`);
+      }
     } catch (error) {
       console.error('Error updating message:', error);
     }
   };
   
-  const handleEditClose = () => {
-    setTitleInput('');
-    setUserInput('');
-    setEditIndex(null);
-    setEditModalOpen(false);
-  };
-  
-  const handleDelete = async (index) => {
-    try {
-        const message = messages[index];
-        
-        if (message) {
-            const { mUsername } = message; // Extract username from message object
-            
-            const response = await fetch(`https://team-goku.dokku.cse.lehigh.edu/userprofiles/${encodeURIComponent('testUsername1')}/delete`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to delete message');
-            }
-            
-            const data = await response.json();
-            console.log('Response from server:', data);
-            
-            const updatedMessages = messages.filter((msg, idx) => idx !== index);
-            setMessages(updatedMessages);
-        } else {
-            console.error('Message not found');
-        }
-    } catch (error) {
-        console.error('Error deleting message:', error);
-    }
-};
-
-
-    
   return (
     <div>
       <Box sx={{ flexGrow: 1 }}>
@@ -225,7 +211,6 @@ function App() {
           </Toolbar>
         </AppBar>
       </Box>
-
       <Modal
         open={openModal}
         onClose={handleCloseModal}
@@ -236,7 +221,6 @@ function App() {
           <Typography id="modal-messages-title" variant="h6" component="h2">
             Add Messages
           </Typography>
-
           <TextField
             id="title-input"
             label="Title"
@@ -253,16 +237,14 @@ function App() {
             onChange={handleInputChange}
             sx={{ mt: 2 }}
           />
-
           <Button onClick={handleSubmit} variant="contained" color="primary" sx={{ mt: 2 }}>
             Post
           </Button>
         </Box>
       </Modal>
-
       <Modal
         open={editModalOpen}
-        onClose={handleEditClose}
+        onClose={handleCloseModal}
         aria-labelledby="modal-messages-title"
         aria-describedby="modal-messages-description"
       >
@@ -286,12 +268,11 @@ function App() {
             onChange={handleInputChange}
             sx={{ mt: 2, mb: 2, display: 'block' }}
           />
-          <Button onClick={handleEditSubmit} variant="contained" color="primary" sx={{ mt: 2 }}>
+          <Button onClick={() => { handleEdit(editIndex); setEditModal(false); }} variant="contained" color="primary" sx={{ mt: 2 }}>
             Update
           </Button>
         </Box>
       </Modal>
-
       <Box sx={{ mt: 4, px: 4 }}>
         <Typography variant="h4" component="h1">Messages</Typography>
         <TableContainer component={Paper}>
@@ -306,17 +287,13 @@ function App() {
               {messages.map((message, index) => (
                 <TableRow key={message.mId} sx={{ fontSize: '0.8rem' }}>
                   <TableCell className={index % 2 === 0 ? 'message-left message-cell' : 'message-right message-cell'} style={{ whiteSpace: 'pre-line', transition: 'background-color 0.3s' }}>
-                    {message.mTitle}< br />{message.mContent}
+                    {message.mTitle}<br />{message.mContent}
                   </TableCell>
                   <TableCell align="center" sx={{ padding: '2px', transition: 'background-color 0.3s' }}>
-                    <IconButton
-                      aria-label="like"
-                      onClick={() => handleLikeToggle(index)}
-                      style={{ color: liked[index] ? 'red' : 'grey', transition: 'color 0.3s' }}
-                    >
-                      <FavoriteIcon />
+                    <IconButton aria-label="like" onClick={() => handleLikeToggle(index)}>
+                        <FavoriteIcon />
                     </IconButton>
-                    <IconButton aria-label="edit" onClick={() => handleEdit(index)}>
+                    <IconButton aria-label="edit" onClick={() => { setEditIndex(index); setEditModal(true); }}>
                       <EditIcon />
                     </IconButton>
                     <IconButton aria-label="delete" onClick={() => handleDelete(index)}>
@@ -334,4 +311,3 @@ function App() {
 }
 
 export default App;
-
