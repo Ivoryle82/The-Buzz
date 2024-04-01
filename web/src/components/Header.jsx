@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
+import Profile from '../pages/Profile'; // Import the Profile component
 import { AppBar, Box, Button, Modal, TextField, Toolbar, Typography } from '@mui/material';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -34,7 +36,7 @@ function App() {
   const [editIndex, setEditIndex] = useState(null);
   const [messages, setMessages] = useState([]);
   const [liked, setLiked] = useState([]);
-
+// Functionalities and switches
   useEffect(() => {
     fetchMessages();
   }, []);
@@ -181,13 +183,13 @@ function App() {
         const data = await response.json();
         console.log('Response from server:', data);
   
-        // Clear input fields and close the modal after successful update
+// Clear input fields and close the modal after successful update
         setTitleInput('');
         setUserInput('');
         setEditIndex(null);
         setEditModal(false);
   
-        // Fetch updated messages
+// Fetch updated messages
         fetchMessages();
       } else {
         console.error(`Message at index ${index} does not exist`);
@@ -196,7 +198,7 @@ function App() {
       console.error('Error updating message:', error);
     }
   };
-  
+// App bar and modals 
   return (
     <div>
       <Box sx={{ flexGrow: 1 }}>
@@ -208,6 +210,7 @@ function App() {
             <Button color="inherit">Login</Button>
             <Button color="inherit">Sign Up</Button>
             <Button color="inherit" onClick={handleOpenModal}>Messages</Button>
+            <Button color="inherit" component={Link} to="/profile">Profile</Button>
           </Toolbar>
         </AppBar>
       </Box>

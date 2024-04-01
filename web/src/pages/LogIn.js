@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Header from '../../components/Header';
+import Header from '../components/Header';
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
