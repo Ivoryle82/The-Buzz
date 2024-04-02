@@ -63,6 +63,7 @@ const Profile = () => {
 
   return (
     <div>
+        <Header/>
       <h2>User Profile</h2>
       <div>
         <label>Name:</label>

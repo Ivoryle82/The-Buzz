@@ -103,6 +103,8 @@ function Message() {
   const handleDelete = async (index) => {
     try {
       const message = messages[index];
+      console.log(message)
+      console.log(message.mUsername)
       if (message) {
         const { mMessageID, mUsername } = message;
         const response = await fetch(`https://team-goku.dokku.cse.lehigh.edu/messages/${mMessageID}`, {
@@ -111,8 +113,8 @@ function Message() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            mUsername: mUsername,
-          }),
+            mUsername: message.mUsername,
+          }), 
         });
         if (!response.ok) {
             console.log(mUsername)
@@ -134,6 +136,7 @@ function Message() {
     try {
       const message = messages[index];
       console.log(message);
+      console.log(message.mUsername)
       if (message) {
         const { mMessageID, mUsername } = message; // Extracting necessary properties from the message object
   
@@ -176,7 +179,7 @@ function Message() {
   return (
     <div>
 {/* Diplaying header  */}
-        <Header />
+      <Header />
 {/* Displaying all the messages */}
       <Modal
         open={editModalOpen}
