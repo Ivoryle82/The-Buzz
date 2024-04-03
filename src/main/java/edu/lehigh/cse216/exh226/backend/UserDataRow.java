@@ -13,10 +13,10 @@ import java.util.Date;
  */
 
 public class UserDataRow {
-    public String mUserID; // the userID
     public String mUsername; // the username (unique primary key)
-    public String mEmail; // the user's email
+    public String mPassword; // the password
     public String mBio; // the user's biography
+    public String mEmail; // the user's email
     public final Date mDateCreated; // the date created
 
     /**
@@ -29,11 +29,11 @@ public class UserDataRow {
      * 
      * @return : a UserDataRow object
      */
-    UserDataRow(String userID, String username, String email, String bio) {
-        mUserID = userID;
+    UserDataRow(String username, String password, String bio, String email) {
         mUsername = username;
-        mEmail = email;
+        mPassword = password;
         mBio = bio;
+        mEmail = email;
         mDateCreated = new Date();
     }
 
@@ -41,8 +41,7 @@ public class UserDataRow {
      * getPassword() : returns the current password
      * TECH DEBT: PROBABLY NOT SAFE TO DO THIS
      */
-    // public String getPassword() {
-    // return mPassword;
-    // }
-    // TECH DEBT: DELETE THIS METHOD
+    public String getPassword() {
+        return mPassword;
+    }
 }
