@@ -4,9 +4,36 @@ import spark.Spark; // Import the Spark package, so we can use the get function 
 
 import com.google.gson.*; // Import Google's JSON library
 
-import edu.lehigh.cse216.exh226.backend.controllers.*;
-//import edu.lehigh.cse216.exh226.backend.DatabaseRoutes;
+// Import google's oauth api
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Date; // for createSessionToken & checkSessionToken
+import java.lang.Math; // for createSessionToken
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+
+// Imports for exchangeCodeForIdToken
+import java.io.IOException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 /**
  * For now, our app creates an HTTP server that is run via the localhost
@@ -23,6 +50,8 @@ public class App {
     // GIVING ANYBODY CONTROL OVER ALL ACTIONS IN OUR DATABASE
     private static final String DEFAULT_PORT_DB = "5432";
     private static final int DEFAULT_PORT_SPARK = 4567;
+    private static final String CLIENT_ID = "233303483347-q0bt1d0gt235ji0k0nna3ilufa6d35qr.apps.googleusercontent.com";
+    private static final String DISCOVERY_DOCUMENT = "https://accounts.google.com/.well-known/openid-configuration";
 
     /**
      * Set up CORS headers for the OPTIONS verb, and for every response that the
@@ -97,6 +126,122 @@ public class App {
     }
 
     /**
+     * exchangeCodeForIdToken : exchanges the code the is sent from the
+     * authentication server for an id_token, which will then be verified
+     * in the redrect route (this will be called in the redirect route).
+     * 
+     * To get the id token I need to send an HTTP POST to the google token endpoint
+     * https://oauth2.googleapis.com/token. Java Spark cannot handle this because
+     * this is an HTTP REQUEST to an external endpoint. (Basically, its like the web
+     * ajax call, which is not Java Spark)
+     * 
+     * @param oneTimeCode : A String for the oneTiemCode
+     * @param gson        : the gson library so I can work with JSON data
+     * 
+     * @return : A String for the id_token
+     */
+    public static String exchangeCodeForIdToken(String oneTimeCode, Gson gson) throws Exception {
+        // System.out.println("TESTING: WE ARE IN exchangeCodeForIdToken method start");
+        String clientId = CLIENT_ID;
+        String clientSecret = System.getenv("CLIENT_SECRET");
+        String redirectUri = "http://localhost:4567/oauth-redirect";
+        String grantType = "authorization_code";
+        String idTokenString = "";
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        try {
+            // Create a custom response handler
+            ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+                @Override
+                public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+                    int status = response.getStatusLine().getStatusCode();
+                    if (status >= 200 && status < 300) {
+                        HttpEntity entity = response.getEntity();
+                        return entity != null ? EntityUtils.toString(entity) : null;
+                    } else {
+                        throw new ClientProtocolException("Unexpected response status: " + status);
+                    }
+                }
+            };
+
+            HttpGet httpGet = new HttpGet(DISCOVERY_DOCUMENT);
+            // System.out.println("Executing request " + httpGet.getRequestLine());
+            String responseBody = httpClient.execute(httpGet, responseHandler);
+            // System.out.println("RESPONSE BODY FOR DISCOVERY DOCUMENT: \n" +
+            // responseBody);
+            // Access token_endpoint data
+            String tokenEndpoint = gson.fromJson(responseBody, OAuthData.class).token_endpoint;
+            System.out.println("TOKEN ENDPOINT: \n" + tokenEndpoint);
+
+            // Make the HTTP POST to the token endpoint
+            HttpPost httpPost = new HttpPost(tokenEndpoint);
+            // Build the request body:
+            String requestBody = String.format(
+                    "{\'code\': \'%s\', \'client_id\': \'%s\', \'client_secret\': \'%s\', \'redirect_uri\': \'%s\', \'grant_type\': \'%s\'}",
+                    oneTimeCode, clientId, clientSecret, redirectUri, grantType);
+            // Set the request body of the HTTP POST:
+            StringEntity stringEntity = new StringEntity(requestBody);
+            httpPost.setEntity(stringEntity);
+            responseBody = ""; // empty the response body
+            responseBody = httpClient.execute(httpPost, responseHandler);
+            idTokenString = gson.fromJson(responseBody, OAuthData.class).id_token;
+            // System.out.println("========================\nID_TOKEN: \n" + idTokenString);
+
+        } finally {
+            httpClient.close();
+        }
+        return idTokenString; // WORKS!!!
+    }
+
+    /**
+     * createSessionToken: creates a new session token in the sessionTokenTbl
+     * Used in the login route which will return this session token
+     * This method will use Java Math Random to generate a random large integer
+     * Then query the sessionTokenTbl to see if that integer already exists,
+     * If it does, repeat until we get a unique random large int
+     * 
+     * Create a new entry in the sessionTokenTbl. This will have the unique session
+     * token and the Date when it was created
+     * 
+     * @param database : the database object (so I can work with the database)
+     * 
+     * @return sessionToken : an integer for the unique session token
+     */
+    public static int createSessionToken(Database db) {
+        int newSessionToken = 0;
+        while (true) {
+            newSessionToken = (int) (Math.random() * 1e9);
+            SessionTokenDataRow sessionTokenDataRow = db.selectOneSessionTokenTblRow(newSessionToken);
+            if (sessionTokenDataRow == null) {
+                break;
+            }
+        }
+        Date dateCreated = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateString = dateFormat.format(dateCreated);
+        db.insertSessionTokenTblRow(newSessionToken, dateString);
+        return newSessionToken;
+    }
+
+    /**
+     * checkSessionToken: compares a session token (will get from frontend)
+     * This method will query the sessionTokenTbl for the session token.
+     * If the session token is null, then redirect to session timeout html page
+     * (this is a safety measure, but wont be entirely needed)
+     * Then, it will get that entry's Date attribute and parse it into a Java Date
+     * class.
+     * Then, compare the current Date to the Date of the session token.
+     * If the difference is more than 5 hours then return false, else return true
+     * 
+     * This will be used in all routes and if false, the route should redirect
+     * the page to a timeout html page and cancel the route. Also the backend
+     * should delete the session token from the sessionTokenTable
+     * 
+     * @param sessionToken : an int for the session token (from the front end)
+     * 
+     * @return valid : a boolean for if the session token is valid
+     */
+    /**
      * main() : the main method for app.java.
      * 1. Ports Java spark to listen to HTTP request via the browser from localhost
      * 2. Establishes a connection to the database
@@ -120,7 +265,6 @@ public class App {
 
         // I dont know why this is here, we should only ever getDatabase through the
         // getDatabaseConnection method
-        // Database mdDatabase = Database.getDatabase(DEFAULT_URL_DB, DEFAULT_PORT_DB);
 
         // Set up the location for serving static files (currently to deploy front-end)
         // If the STATIC_LOCATION environment variable is set, we will serve it.
@@ -157,6 +301,81 @@ public class App {
         });
 
         /**
+         * oauth-redirect route: google server will redirect to this route on successful
+         * sign in.
+         * 
+         * Web makes an HTTP request to:
+         * https://accounts.google.com/o/oauth2/v2/auth?
+         * response_type=code&
+         * client_id=233303483347-q0bt1d0gt235ji0k0nna3ilufa6d35qr.apps.googleusercontent.com&
+         * scope=openid%20email%20profile&
+         * redirect_uri=http://localhost:4567/oauth-redirect&
+         * nonce=0394852-3190485-2490358& (THE WEB NEEDS TO GENERATE THIS)
+         * 
+         * oauth-redirect: creates a new user in the userTbl (essentially replaces the
+         * signup route) if the user is not in the userTbl. Creates a new session token
+         * and adds it to the sessionTokenTbl
+         * 
+         * Returns: a new session token (an int) for the valid session token in the
+         * sessionTokenTbl
+         * 
+         */
+        Spark.get("/oauth-redirect", (request, response) -> {
+            // System.out.println("TESTING 1");
+            int sessionToken = 0;
+            // getting the one time code:
+            String oneTimeCode = request.queryParams("code");
+            // System.out.println("TEST oneTimeCode: " + oneTimeCode);
+            // exchanging the one time code for a id_token:
+            String idTokenString = exchangeCodeForIdToken(oneTimeCode, gson);
+            // System.out.println("TEST idTokenString: \n" + idTokenString);
+
+            // Verifying the id_token:
+            // Create the token verifier, used for verifying the GoogleIdToken object
+            HttpTransport transport = new NetHttpTransport();
+            JsonFactory jsonFactory = new GsonFactory();
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport,
+                    jsonFactory)
+                    // Specify the CLIENT_ID of the app that accesses the backend:
+                    .setAudience(Collections.singletonList(CLIENT_ID))
+                    // Or, if multiple clients access the backend:
+                    // .setAudience(Arrays.asList(CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(idTokenString);
+            if (idToken != null) {
+                Payload payload = idToken.getPayload();
+
+                // Get profile information from payload
+                String userId = payload.getSubject();
+                String email = payload.getEmail();
+                boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
+                String name = (String) payload.get("name");
+                // System.out.println("name: " + name);
+                // System.out.println("User ID: " + userId);
+                // System.out.printf("Test profile info: \n %s, %s", email, emailVerified);
+
+                // Query the database for the userId
+                UserDataRow user = db.selectOneUserTblRow(userId);
+                if (user == null) { // insert user into the userTbl
+                    db.insertUserTblRow(userId, name, email, "");
+                }
+                // Now I need to create and return a session token
+                response.redirect("/index.html");
+                sessionToken = createSessionToken(db);
+            } else {
+                // handle an invalid ID token
+                System.out.println("Invalid ID token.");
+                response.status(400);
+                response.type("application/json");
+                return gson.toJson(new StructuredResponse("error", "Invalid ID token", null));
+            }
+
+            return gson.toJson(new StructuredResponse("ok", "", sessionToken));
+        });
+
+        /**
+         * DEPRECATED
          * Route for signing up (POST). Creates a new entry in the userTbl.
          * Does not return any data to the front end.
          * TECH DEBT: After sign up it should return a token that is similar to the
@@ -170,21 +389,25 @@ public class App {
          * username : String
          * password : String
          */
-        Spark.post("/signup/:username/:password", (request, response) -> {
-            // Ensure status of 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
-            String username = request.params("username");
-            String password = request.params("password");
-            UserDataRow userData = gson.fromJson(request.body(), UserDataRow.class);
-            String bio = userData.mBio;
-            String email = userData.mEmail;
-
-            int numUsersAdded = db.insertUserTblRow(username, password, bio, email);
-            return gson.toJson(new StructuredResponse("ok", "number of users added: " + numUsersAdded, null));
-        });
+        /*
+         * Spark.post("/signup/:username/:password", (request, response) -> {
+         * // Ensure status of 200 OK, with a MIME type of JSON
+         * response.status(200);
+         * response.type("application/json");
+         * String username = request.params("username");
+         * String password = request.params("password");
+         * UserDataRow userData = gson.fromJson(request.body(), UserDataRow.class);
+         * String bio = userData.mBio;
+         * String email = userData.mEmail;
+         * 
+         * int numUsersAdded = db.insertUserTblRow(username, password, bio, email);
+         * return gson.toJson(new StructuredResponse("ok", "number of users added: " +
+         * numUsersAdded, null));
+         * });
+         */
 
         /**
+         * DEPRECATED
          * Route for logging in (GET). Queries the userTbl to see if the password
          * matches
          * with the username. If it does, return the username to the front-end. Serving
@@ -205,19 +428,21 @@ public class App {
          * 
          * "http://localhost:4567/login/:username/:password"
          */
-        Spark.get("/login/:username/:password", (request, response) -> {
-            // Ensure status of 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
-            String username = request.params("username");
-            String password = request.params("password");
-            UserDataRow user = db.selectOneUserTblRow(username);
-            if (user.getPassword().equals(password)) {
-                return gson.toJson(new StructuredResponse("ok", null, username));
-            } else {
-                return gson.toJson(new StructuredResponse("error", "failed login", null));
-            }
-        });
+        /*
+         * Spark.get("/login/:username/:password", (request, response) -> {
+         * // Ensure status of 200 OK, with a MIME type of JSON
+         * response.status(200);
+         * response.type("application/json");
+         * String username = request.params("username");
+         * String password = request.params("password");
+         * UserDataRow user = db.selectOneUserTblRow(username);
+         * if (user.getPassword().equals(password)) {
+         * return gson.toJson(new StructuredResponse("ok", null, username));
+         * } else {
+         * return gson.toJson(new StructuredResponse("error", "failed login", null));
+         * }
+         * });
+         */
 
         /**
          * Route to view user profile (GET)
@@ -239,6 +464,7 @@ public class App {
         });
 
         /**
+         * TECH DEBT: FIX LATER TO COMPLY W/ OAUTH
          * Route to update user profile (PUT)
          * 
          * Parameters(data in request.body):
@@ -256,23 +482,27 @@ public class App {
          * TECH DEBT: username passed like this has many flaws, plz read everything I
          * wrote about Tech Debt of creating an authentication token
          */
-        Spark.put("/userprofiles/:username", (request, response) -> {
-            String username = request.params("username");
-            // Ensure status of 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
+        // Spark.put("/userprofiles/:userID", (request, response) -> {
+        // String username = request.params("username");
+        // // Ensure status of 200 OK, with a MIME type of JSON
+        // response.status(200);
+        // response.type("application/json");
 
-            UserRequest reqData = gson.fromJson(request.body(), UserRequest.class);
-            UserDataRow userData = db.selectOneUserTblRow(username);
+        // UserRequest reqData = gson.fromJson(request.body(), UserRequest.class);
+        // UserDataRow userData = db.selectOneUserTblRow(username);
 
-            if (reqData.mUsername.equals(userData.mUsername)) { // Front end is logged in, we are allowed to edit
-                db.updateOneUserTblRow(userData.mUsername, reqData.mNewUsername, reqData.mPassword, reqData.mBio,
-                        reqData.mEmail);
-                return gson.toJson(new StructuredResponse("ok", "user updated profile", null));
-            } else {
-                return gson.toJson(new StructuredResponse("error", "tried to edit a user that wasnt yours", null));
-            }
-        });
+        // if (reqData.mUsername.equals(userData.mUsername)) { // Front end is logged
+        // in, we are allowed to edit
+        // db.updateOneUserTblRow(userData.mUsername, reqData.mNewUsername,
+        // reqData.mPassword, reqData.mBio,
+        // reqData.mEmail);
+        // return gson.toJson(new StructuredResponse("ok", "user updated profile",
+        // null));
+        // } else {
+        // return gson.toJson(new StructuredResponse("error", "tried to edit a user that
+        // wasnt yours", null));
+        // }
+        // });
 
         /**
          * Route to delete user profile (DELETE)
@@ -477,14 +707,9 @@ public class App {
 
             if (userLikesData == null) { // we haven't liked the message yet
                 likeCount++;
-                /**
-                 * Change this in the backend aswell
-                 */
-                db.insertUserLikesTblRow(username, messageID);
                 result = db.updateOneMessageTblRowLikes(messageID, likeCount);
             } else {
                 likeCount--;
-                db.deleteOneUserLikesTblRow(username, messageID);
                 result = db.updateOneMessageTblRowLikes(messageID, likeCount);
             }
 
