@@ -1,4 +1,4 @@
-package edu.lehigh.cse216.exh226.backend;
+package main.java.edu.lehigh.cse216.exh226.backend;
 
 /**
  * OAuthData class:
