@@ -12,8 +12,6 @@ import java.util.ArrayList;
 
 import javax.naming.spi.DirStateFactory.Result;
 
-import org.eclipse.jetty.server.session.Session;
-
 public class Database {
     /**
      * The connection to the database. When there is no connection, it should be
@@ -102,6 +100,7 @@ public class Database {
      * IE: the userLikes from the userLikesTbl
      */
     private PreparedStatement mDeleteOneMessage;
+
     // ========== End of messageTbl Prepared Statements =========
 
     // ========== Prepared Statements for userLikesTbl ==========
@@ -122,22 +121,42 @@ public class Database {
      */
     private PreparedStatement mDeleteOneUserLikes;
 
-    // =========== Prepared Statements for sessionTokenTbl ========
-    /**
-     * mInsertOneSessionToken: inserts one entry into the sessionTokenTbl
-     */
-    private PreparedStatement mInsertOneSessionToken;
+    // ========== End of userLikesTbl Prepared Statements ========
 
-    /**
-     * mSelectOneSessionToken: selects one session token based on the sessionToken
-     */
-    private PreparedStatement mSelectOneSessionToken;
+    // KEEP THE PREPARED STATEMENTS BELOW UNTIL AFTER TESTING THE ONES ABOVE
+    // /**
+    // * A prepared statement for getting all data in the database
+    // */
+    // private PreparedStatement mSelectAll;
 
-    /**
-     * mDeleteOneSessionToken: deletes on session token from sessionTokenTbl
-     */
-    private PreparedStatement mDeleteOneSessionToken;
-    // ========End of sessionTokenTbl Prepared Statements =========
+    // /**
+    // * A prepared statement for getting on row form the database
+    // */
+    // private PreparedStatement mSelectOne;
+
+    // /**
+    // * A prepared statement for deleting a row from the database
+    // */
+    // private PreparedStatement mDeleteOne;
+
+    // /**
+    // * A prepared statement for inseting into the database
+    // */
+    // private PreparedStatement mInsertOne;
+
+    // /**
+    // * A prepared statment for updating a single row in the database
+    // */
+    // private PreparedStatement mUpdateOne;
+    // /**
+    // * A prepared statement for creating the table in our database
+    // */
+    // private PreparedStatement mCreateTable;
+
+    // /**
+    // * A prepared statment for dropping the table in our database
+    // */
+    // private PreparedStatement mDropTable;
 
     /**
      * createPreparedStatements: initialize all prepared statements
@@ -157,11 +176,11 @@ public class Database {
         // .prepareStatement("") The parameter is SQL language
         try {
             // Prepared Statements for userTbl
-            mInsertOneUser = mConnection.prepareStatement("INSERT INTO userTbl VALUES (?, ?, ?, ?)");
-            mSelectOneUser = mConnection.prepareStatement("SELECT * FROM userTbl WHERE userID=?");
+            mInsertOneUser = mConnection.prepareStatement("INSERT INTO userTbl VALUES (?, ?, ?, ?, ?)");
+            mSelectOneUser = mConnection.prepareStatement("SELECT * FROM userTbl WHERE username=?");
             mUpdateOneUser = mConnection.prepareStatement(
-                    "UPDATE userTbl SET username=?,email=?,bio=? WHERE userID=?");
-            mDeleteOneUser = mConnection.prepareStatement("DELETE FROM userTbl WHERE userID=?");
+                    "UPDATE userTbl SET userID=0,username=?,password=?,bio=?,email=? WHERE username=?");
+            mDeleteOneUser = mConnection.prepareStatement("DELETE FROM userTbl WHERE username=?");
 
             // Prepared Statements for messageTbl
             mInsertOneMessage = mConnection.prepareStatement("INSERT INTO messageTbl VALUES (?,?,?,?,0)");
@@ -182,10 +201,20 @@ public class Database {
             mDeleteOneUserLikes = mConnection
                     .prepareStatement("DELETE FROM userLikesTbl WHERE username=? AND messageID=?");
 
-            // Prepared Statements for sessionTokenTbl
-            mInsertOneSessionToken = mConnection.prepareStatement("INSERT INTO sessionTokenTbl VALUES(?,?)");
-            mSelectOneSessionToken = mConnection.prepareStatement("SELECT * FROM sessionTokenTbl WHERE sessionToken=?");
-            mDeleteOneSessionToken = mConnection.prepareStatement("DELETE FROM sessionTokenTbl WHERE sessionToken=?");
+            // BELOW STATEMENTS ARE UNECESSARY BUT KEEP THEM IN FOR NOW UNTIL AFTER TESTING
+            // mCreateTable = mConnection.prepareStatement(
+            // "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) NOT NULL,
+            // message VARCHAR(500) NOT NULL)");
+            // mDropTable = mConnection.prepareStatement("DROP TABLE tblData");
+            // mDeleteOne = mConnection.prepareStatement("DELETE FROM tblDATA WHERE id =
+            // ?");
+            // mInsertOne = mConnection.prepareStatement("INSERT INTO tblData VALUES
+            // (default, ?, ?)");
+            // mSelectAll = mConnection.prepareStatement("SELECT id, subject FROM tblData");
+            // mSelectOne = mConnection.prepareStatement("SELECT * from tblData WHERE
+            // id=?");
+            // mUpdateOne = mConnection.prepareStatement("UPDATE tblData SET message = ?
+            // WHERE id = ?");
         } catch (SQLException e) {
             System.err.println("Error creating prepared statements");
             e.printStackTrace();
@@ -320,21 +349,20 @@ public class Database {
     /**
      * insertUserTblRow: Creates one user in the userTbl
      * 
-     * @param userID   : an int for the userID
-     * @param username : a string for the username
-     * @param email    : a string for the user's email
-     *                 (The above 3 parameters are retrieved via OAUTH)
+     * @param username : a string for the username (primary key)
+     * @param password : a string for the password
      * @param bio      : a string for the user's biography
+     * @param email    : a string for the user's email
      * 
      * @return : returns the userID of the new row in userTbl
      */
-    int insertUserTblRow(String userID, String username, String email, String bio) {
+    int insertUserTblRow(String username, String password, String bio, String email) {
         int count = 0;
         try {
-            mInsertOneUser.setString(1, userID);
-            mInsertOneUser.setString(2, username);
-            mInsertOneUser.setString(3, email);
-            mInsertOneUser.setString(4, bio);
+            mInsertOneUser.setString(1, username);
+            mInsertOneUser.setString(2, password);
+            mInsertOneUser.setString(3, bio);
+            mInsertOneUser.setString(4, email);
             count += mInsertOneUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -345,14 +373,14 @@ public class Database {
     /**
      * selectOneUserTblRow: selects one user from the userTbl
      * 
-     * @param userID : the userID (unique primary key) for an element in userTbl
+     * @param username : the username (unique primary key) for an element in userTbl
      * 
      * @return : returns a UserDataRow
      */
-    UserDataRow selectOneUserTblRow(String userID) {
+    UserDataRow selectOneUserTblRow(String username) {
         UserDataRow res = null;
         try {
-            mSelectOneUser.setString(1, userID);
+            mSelectOneUser.setString(1, username);
             ResultSet rs = mSelectOneUser.executeQuery();
             if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
                 res = new UserDataRow(rs.getString("username"), rs.getString("password"),
@@ -371,27 +399,23 @@ public class Database {
      * update any number of these fields, or have front end deal w/ this
      * just need to make sure we pass enough parameters (and correct ones) in here
      * 
-     * Tech Debt: on OAUTH sign in the email should automatically update to what the
-     * OAUTH returns as a google email can change unexpectedly.
-     * 
-     * NB: it doesn't matter if a user updates their username, email, or bio. Even
-     * though these fields were provided by OAUTH. As long as userID never changes.s
-     * 
-     * @param userID      : an int for the userID of the userTbl row to update *
+     * @param username    : a String for username of the userTbl row to update
      * @param newUsername : a String for the new username
-     * @param newEmail    : a String for the new email
+     * @param newPassword : a String for the new password
      * @param newBio      : a String for the new bio
+     * @param newEmail    : a String for the new email
      * 
      * @return : returns an int for the number of rows that were updated, or -1 if
      *         there was an error
      */
-    int updateOneUserTblRow(String userID, String newUsername, String newEmail, String newBio) {
+    int updateOneUserTblRow(String username, String newUsername, String newPassword, String newBio, String newEmail) {
         int res = -1;
         try {
             mUpdateOneUser.setString(1, newUsername);
-            mUpdateOneUser.setString(2, newEmail);
+            mUpdateOneUser.setString(2, newPassword);
             mUpdateOneUser.setString(3, newBio);
-            mUpdateOneUser.setString(4, userID); // this is how we query the specific row in userTbl
+            mUpdateOneUser.setString(4, newEmail);
+            mUpdateOneUser.setString(5, username); // this is how we query the specific row in userTbl
             res = mUpdateOneUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -407,10 +431,10 @@ public class Database {
      * @return : The number of rows that were deleted, return -1 if there was an
      *         error
      */
-    int deleteOneUserTblRow(String userID) {
+    int deleteOneUserTblRow(String username) {
         int res = -1;
         try {
-            mDeleteOneUser.setString(1, userID);
+            mDeleteOneUser.setString(1, username);
             res = mDeleteOneUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -677,65 +701,135 @@ public class Database {
         return res;
     } // End of userLikesTbl methods
 
-    /**
-     * insertSessionTokenTblRow: Creates one entry in the sessionTokenTbl
-     * 
-     * @param sessionToken : an int for the session token
-     * @param dateCreated  : a String parsed from Java Date class, format must be:
-     *                     "yyyy-MM-dd HH:mm:ss"
-     * 
-     * @return : returns the number of rows in sessionTokenTbl
-     */
-    int insertSessionTokenTblRow(int sessionToken, String dateCreated) {
-        int count = 0;
-        try {
-            mInsertOneSessionToken.setInt(1, sessionToken);
-            mInsertOneSessionToken.setString(2, dateCreated);
-            count += mInsertOneSessionToken.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
+    // BELOW METHODS ARE UNECESSARY AND WILL BE DELETED
+
+    // /**
+    // * insertRow: Insert a row into the database
+    // *
+    // * @param subject : The subject for this new row
+    // * @param message : The message body for this new row
+    // *
+    // * @return : The number of rows that were inserted
+    // */
+    // int insertRow(String subject, String message) {
+    // int count = 0;
+    // try {
+    // mInsertOne.setString(1, subject);
+    // mInsertOne.setString(2, message);
+    // count += mInsertOne.executeUpdate();
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return count;
+    // }
+
+    // /**
+    // * Query the database for a list of all subjects and their IDs
+    // * Equivalent to DataStore.readAll
+    // *
+    // * @return All rows, as an ArrayList of RowData (rows) objects
+    // */
+    // ArrayList<DataRow> selectAll() {
+    // ArrayList<DataRow> res = new ArrayList<DataRow>();
+    // try {
+    // ResultSet rs = mSelectAll.executeQuery(); // executeQuery i assumed executes
+    // // SQL. So here it is selecting
+    // // all via the PreparedStatement to select all
+    // while (rs.next()) {
+    // res.add(new DataRow(rs.getInt("id"), rs.getString("subject"), null));
+    // }
+    // rs.close();
+    // return res;
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // return null;
+    // }
+    // }
+
+    // /**
+    // * Get all data for a specific row, by ID
+    // *
+    // * @param id : The id of the row beign requested
+    // *
+    // * @return :The data for the requested row (RowData object), or null if
+    // * invalid
+    // * ID
+    // */
+    // DataRow selectOne(int id) {
+    // DataRow res = null;
+    // try {
+    // mSelectOne.setInt(1, id);
+    // ResultSet rs = mSelectOne.executeQuery();
+    // if (rs.next()) { // Why do we do rs.next()?
+    // res = new DataRow(rs.getInt("id"), rs.getString("subject"),
+    // rs.getString("message"));
+    // }
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return res;
+    // }
+
+    // /**
+    // * Delete a row by ID
+    // *
+    // * @param id : The id of the row to delete
+    // *
+    // * @return : The number of rows that were deleted. -1 indicates an error.
+    // */
+    // int deleteRow(int id) {
+    // int res = -1;
+    // try {
+    // mDeleteOne.setInt(1, id);
+    // res = mDeleteOne.executeUpdate(); // Execute update differs from execute
+    // query
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return res;
+    // }
+
+    // /**
+    // * Update the message for a row in the database
+    // *
+    // * @param id : The id of the row to update
+    // * @param message : the new message contents
+    // *
+    // * @return : The number of rows that were updated. -1 indicates an error
+    // */
+    // int updateOne(int id, String message) {
+    // int res = -1;
+    // try {
+    // mUpdateOne.setString(1, message);
+    // mUpdateOne.setInt(2, id);
+    // res = mUpdateOne.executeUpdate();
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return res;
+    // }
 
     /**
-     * selectOneSessionTokenTblRow: selects one entry from the sessionTokenTbl
-     * 
-     * @param sessionToken : an int for the sessionToken of the entry to select
-     * 
-     * @return : returns a SessionTokenTblRow
+     * Create tblData. If it already exists, print an error
+     * we know it creates tblData bc that is the name from the PreparedStatement
      */
-    SessionTokenDataRow selectOneSessionTokenTblRow(int sessionToken) {
-        SessionTokenDataRow res = null;
-        try {
-            mSelectOneSessionToken.setInt(1, sessionToken);
-            ResultSet rs = mSelectOneSessionToken.executeQuery();
-            if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new SessionTokenDataRow(rs.getInt("sessionToken"), rs.getString("dateCreated"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
+    // void createTable() {
+    // try {
+    // mCreateTable.execute(); // another new execute command, prob differs based on
+    // SQL content
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // }
 
-    /**
-     * deleteOneSessionTokenTblRow: deletes one row in sessionTokenTbl
-     * 
-     * @param sessionToken : an int for the session token to delete
-     * 
-     * @return : The number of rows that were deleted, return -1 if there was an
-     *         error (this included if a row was not deleted)
-     */
-    int deleteOneSessionTokenTblRow(int sessionToken) {
-        int res = -1;
-        try {
-            mDeleteOneSessionToken.setInt(1, sessionToken);
-            res = mDeleteOneSessionToken.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    } // End of sessionTokenTbl methods
-
+    // /**
+    // * Remove tblData from the database. If it does not exist, print an error
+    // */
+    // void dropTable() {
+    // try {
+    // mDropTable.execute();
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // }
 }
