@@ -29,15 +29,15 @@ public class UserDataRowTest extends TestCase {
      * Ensure that the constructor populates every field of the object it creates
      */
     public void testConstructor() {
+        String userID = "testing userID"; // the userID
         String username = "testing username"; // the username
-        String password = "testing password"; // the password
-        String bio = "testing bio"; // the user's biography
         String email = "testing email"; // the user's email
-        UserDataRow testUserDataRow = new UserDataRow(username, password, bio, email);
+        String bio = "testing bio"; // the user's biography
+        UserDataRow testUserDataRow = new UserDataRow(userID, username, email, bio);
+        assertTrue(testUserDataRow.mUserID.equals(userID));
         assertTrue(testUserDataRow.mUsername.equals(username));
-        assertTrue(testUserDataRow.mPassword.equals(password));
-        assertTrue(testUserDataRow.mBio.equals(bio));
         assertTrue(testUserDataRow.mEmail.equals(email));
+        assertTrue(testUserDataRow.mBio.equals(bio));
         assertFalse(testUserDataRow.mDateCreated == null); // because this is automatically created, if it is null
                                                            // something went wrong
     }
