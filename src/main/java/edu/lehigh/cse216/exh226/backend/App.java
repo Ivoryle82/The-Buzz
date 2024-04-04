@@ -144,7 +144,7 @@ public class App {
         // System.out.println("TESTING: WE ARE IN exchangeCodeForIdToken method start");
         String clientId = CLIENT_ID;
         String clientSecret = System.getenv("CLIENT_SECRET");
-        String redirectUri = "http://localhost:4567/oauth-redirect";
+        String redirectUri = "https://team-goku.dokku.cse.lehigh.edu/oauth-redirect";
         String grantType = "authorization_code";
         String idTokenString = "";
 
