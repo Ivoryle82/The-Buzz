@@ -13,10 +13,11 @@ import java.util.Date;
  */
 
 public class UserDataRow {
-    public String mUserID; // the userID
-    public String mUsername; // the username (unique primary key)
+    public String mUserID; // the userID (unique primary key)
+    public String mUsername; // the username
     public String mEmail; // the user's email
     public String mBio; // the user's biography
+    public String mNewUsername; // the new username
     public final Date mDateCreated; // the date created
 
     /**
