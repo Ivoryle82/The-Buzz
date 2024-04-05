@@ -96,12 +96,6 @@ public class Database {
     private PreparedStatement mUpdateOneMessageLikes;
 
     /**
-     * mUpdateMessageDislikes: updates the dislikeCount field only for and element
-     * in the messageTbl. Finds the message via messageID.
-     */
-    private PreparedStatement mUpdateOneMessageDislikes;
-
-    /**
      * mDeleteOneMessage: deletes one entry from messageTbl, necessary for
      * user to delete their profile.
      * Tech Debt: When deleting a message need to delete all corresponding data,
@@ -127,26 +121,6 @@ public class Database {
      * mDeleteOneUserLike: deletes one entry into the userLikeTbl
      */
     private PreparedStatement mDeleteOneUserLikes;
-    // ========== End of userLikesTbl Prepared Statements =========
-
-    // ========== Prepared Statements for userDislikesTbl ==========
-    /**
-     * mInsertOneUserLike: inserts one entry into the userLikeTbl
-     */
-    private PreparedStatement mInsertOneUserDislikes;
-
-    /**
-     * mSelectOneUserLike: selects one entry from the userLikeTbl
-     * based on a passed username and messageID.
-     * If this returns null it means the user hasn't liked the message yet
-     */
-    private PreparedStatement mSelectOneUserDislikes;
-
-    /**
-     * mDeleteOneUserLike: deletes one entry into the userLikeTbl
-     */
-    private PreparedStatement mDeleteOneUserDislikes;
-    // ========== End of userLikesTbl Prepared Statements =========
 
     // =========== Prepared Statements for sessionTokenTbl ========
     /**
@@ -164,42 +138,6 @@ public class Database {
      */
     private PreparedStatement mDeleteOneSessionToken;
     // ========End of sessionTokenTbl Prepared Statements =========
-
-    // ========Start of commentsTbl Prepared Statements ===========
-    /**
-     * mSelectOneComment: Selects one comment from the commentsTbl based on the
-     * commentID
-     */
-    private PreparedStatement mSelectOneComment;
-
-    /**
-     * mSelectMultipleComments: Selects all comments for a specific messageID
-     */
-    private PreparedStatement mSelectMultipleComments;
-
-    /**
-     * mSelectMaxCommentID: returns the largest commentID from commentsTbl,
-     * necessary for the server to properly increment the commentID when a new
-     * comment is requested
-     */
-    private PreparedStatement mSelectMaxCommentID;
-
-    /**
-     * mInsertOneComment: inserts one comment into the comments table
-     * creates a new commentID based on an increment
-     */
-    private PreparedStatement mInsertOneComment;
-
-    /**
-     * mUpdateOneComment: edits one comment, takes in the commentID
-     * and new content
-     */
-    private PreparedStatement mUpdateOneComment;
-
-    /**
-     * mDeleteOneComment: deletes one comment, based on the commentID
-     */
-    private PreparedStatement mDeleteOneComment;
 
     /**
      * createPreparedStatements: initialize all prepared statements
@@ -226,7 +164,7 @@ public class Database {
             mDeleteOneUser = mConnection.prepareStatement("DELETE FROM userTbl WHERE userID=?");
 
             // Prepared Statements for messageTbl
-            mInsertOneMessage = mConnection.prepareStatement("INSERT INTO messageTbl VALUES (?,?,?,?,0,0)");
+            mInsertOneMessage = mConnection.prepareStatement("INSERT INTO messageTbl VALUES (?,?,?,?,0)");
             mSelectMaxMessageID = mConnection.prepareStatement("SELECT max(messageID) FROM messageTbl");
             mSelectOneMessage = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE messageID=?");
             mSelectAllMessage = mConnection.prepareStatement("SELECT * FROM messageTbl");
@@ -235,37 +173,19 @@ public class Database {
                     "UPDATE messageTbl SET title=?,content=? WHERE messageID=?");
             mUpdateOneMessageLikes = mConnection.prepareStatement(
                     "UPDATE messageTbl SET likeCount=? WHERE messageID=?");
-            mUpdateOneMessageDislikes = mConnection.prepareStatement(
-                    "UPDATE messageTbl SET dislikeCount=? WHERE messageID=?");
             mDeleteOneMessage = mConnection.prepareStatement("DELETE FROM messageTbl WHERE messageID=?");
 
             // Prepared Statements for userLikesTbl
             mInsertOneUserLikes = mConnection.prepareStatement("INSERT INTO userLikesTbl VALUES (?,?)");
             mSelectOneUserLikes = mConnection
-                    .prepareStatement("SELECT * FROM userLikesTbl WHERE messageID=? AND userID=?");
+                    .prepareStatement("SELECT * FROM userLikesTbl WHERE messageID=? AND username=?");
             mDeleteOneUserLikes = mConnection
-                    .prepareStatement("DELETE FROM userLikesTbl WHERE userID=? AND messageID=?");
-
-            // Prepared Statements for userLikesTbl
-            mInsertOneUserDislikes = mConnection.prepareStatement("INSERT INTO userDislikesTbl VALUES (?,?)");
-            mSelectOneUserDislikes = mConnection
-                    .prepareStatement("SELECT * FROM userDislikesTbl WHERE messageID=? AND userID=?");
-            mDeleteOneUserDislikes = mConnection
-                    .prepareStatement("DELETE FROM userDislikesTbl WHERE userID=? AND messageID=?");
+                    .prepareStatement("DELETE FROM userLikesTbl WHERE username=? AND messageID=?");
 
             // Prepared Statements for sessionTokenTbl
-            mInsertOneSessionToken = mConnection.prepareStatement("INSERT INTO sessionTokenTbl VALUES (?,?)");
+            mInsertOneSessionToken = mConnection.prepareStatement("INSERT INTO sessionTokenTbl VALUES(?,?)");
             mSelectOneSessionToken = mConnection.prepareStatement("SELECT * FROM sessionTokenTbl WHERE sessionToken=?");
             mDeleteOneSessionToken = mConnection.prepareStatement("DELETE FROM sessionTokenTbl WHERE sessionToken=?");
-
-            // Prepared Statements for commentsTbl
-            mSelectOneComment = mConnection.prepareStatement("SELECT * FROM commentsTbl WHERE commentID=?");
-            mSelectMultipleComments = mConnection
-                    .prepareStatement("SELECT * FROM commentsTbl WHERE messageID=?");
-            mSelectMaxCommentID = mConnection.prepareStatement("SELECT max(commentID) FROM commentsTbl");
-            mInsertOneComment = mConnection.prepareStatement("INSERT INTO commentsTbl VALUES (?,?,?,?)");
-            mUpdateOneComment = mConnection.prepareStatement("UPDATE commentsTbl SET content=? WHERE commentID=?");
-            mDeleteOneComment = mConnection.prepareStatement("DELETE FROM commentsTbl WHERE commentID=?");
         } catch (SQLException e) {
             System.err.println("Error creating prepared statements");
             e.printStackTrace();
@@ -437,8 +357,6 @@ public class Database {
             if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
                 res = new UserDataRow(rs.getString("username"), rs.getString("password"),
                         rs.getString("bio"), rs.getString("email"));
-            } else {
-                res = null;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -561,9 +479,8 @@ public class Database {
             mSelectOneMessage.setInt(1, messageID);
             ResultSet rs = mSelectOneMessage.executeQuery();
             if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new MessageDataRow(rs.getInt("messageID"), rs.getString("userID"),
-                        rs.getString("title"), rs.getString("content"), rs.getInt("likeCount"),
-                        rs.getInt("dislikeCount"));
+                res = new MessageDataRow(rs.getString("username"), rs.getInt("messageID"),
+                        rs.getString("title"), rs.getString("content"), rs.getInt("likeCount"));
             }
             rs.close();
         } catch (SQLException e) {
@@ -585,8 +502,8 @@ public class Database {
             mSelectAllMessageForUser.setString(1, username);
             ResultSet rs = mSelectAllMessageForUser.executeQuery();
             while (rs.next()) {
-                res.add(new MessageDataRow(rs.getInt("messageID"), rs.getString("userID"), rs.getString("title"),
-                        rs.getString("content"), rs.getInt("likeCount"), rs.getInt("dislikeCount")));
+                res.add(new MessageDataRow(rs.getString("username"), rs.getInt("messageID"), rs.getString("title"),
+                        rs.getString("content"), rs.getInt("likeCount")));
             }
             rs.close();
             return res;
@@ -608,8 +525,8 @@ public class Database {
         try {
             ResultSet rs = mSelectAllMessage.executeQuery();
             while (rs.next()) {
-                res.add(new MessageDataRow(rs.getInt("messageID"), rs.getString("userID"), rs.getString("title"),
-                        rs.getString("content"), rs.getInt("likeCount"), rs.getInt("dislikeCount")));
+                res.add(new MessageDataRow(rs.getString("username"), rs.getInt("messageID"), rs.getString("title"),
+                        rs.getString("content"), rs.getInt("likeCount")));
             }
             rs.close();
             return res;
@@ -676,35 +593,6 @@ public class Database {
     }
 
     /**
-     * updateOneMessageTblRowDislikes : updates one row in the messageTbl
-     * 
-     * Tech Debt: In the backend we can use the selectOneMessageTblRow to first get
-     * the likes and have that increment or decrement via a route to that method.
-     * Then use that resulting value to update the likeCount.
-     * OR we could have 2 separate database methods, 1 for inc and 1 for dec
-     * likeCount, BUT, doing that would require us to call the
-     * selectOneMessageTblRow anyway before incrementing or decrementing the
-     * likeCount
-     * 
-     * @param messageID    : an int for the messageID
-     * @param newLikeCount : an int for the new likeCount
-     *
-     * @return : returns an int for the number of rows that were updated, or -1 if
-     *         there was an error
-     */
-    int updateOneMessageTblRowDislikes(int messageID, int newDislikeCount) {
-        int res = -1;
-        try {
-            mUpdateOneMessageDislikes.setInt(1, newDislikeCount);
-            mUpdateOneMessageDislikes.setInt(2, messageID); // this is how we query the specific row in messageTbl
-            res = mUpdateOneMessageDislikes.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
-
-    /**
      * deleteOneMessageTblRow: deletes one row in messageTbl
      * 
      * @param messageID : a int for the message of the messageTbl row to delete
@@ -758,7 +646,7 @@ public class Database {
             mSelectOneUserLikes.setInt(2, messageID);
             ResultSet rs = mSelectOneUserLikes.executeQuery();
             if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new UserLikesDataRow(rs.getString("userID"), rs.getInt("messageID"));
+                res = new UserLikesDataRow(rs.getString("username"), rs.getInt("messageID"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -788,72 +676,6 @@ public class Database {
         }
         return res;
     } // End of userLikesTbl methods
-
-    /**
-     * insertUserDislikesTblRow: Creates one userLikes in the userLikesTbl
-     * 
-     * @param userID    : a string for the userID
-     * @param messageID : a int for the messageID
-     * 
-     * @return : returns the number of rows in userLikesTbl
-     */
-    int insertUserDislikesTblRow(String userID, int messageID) {
-        int count = 0;
-        try {
-            mInsertOneUserDislikes.setString(1, userID);
-            mInsertOneUserDislikes.setInt(2, messageID);
-            count += mInsertOneUserDislikes.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
-
-    /**
-     * selectOneUserDislikesTblRow: selects one userLikes from the userLikesTbl
-     * 
-     * @param userID    : a String for the userID of an element in userLikesTbl
-     * @param messageID : a int for the messageID of an element in userLikesTbl
-     * 
-     * @return : returns a UserLikesDataRow
-     */
-    UserDislikesDataRow selectOneUserDislikesTblRow(String userID, int messageID) {
-        UserDislikesDataRow res = null;
-        try {
-            mSelectOneUserDislikes.setString(1, userID);
-            mSelectOneUserDislikes.setInt(2, messageID);
-            ResultSet rs = mSelectOneUserDislikes.executeQuery();
-            if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new UserDislikesDataRow(rs.getString("userID"), rs.getInt("messageID"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
-
-    /**
-     * deleteOneUserDislikesTblRow: deletes one row in userLikesTbl
-     * 
-     * @param userID    : a String for the userID of the userLikesTbl row to
-     *                  delete
-     * @param messageID : a String for the messageID of the userLikesTbl row to
-     *                  delete
-     * 
-     * @return : The number of rows that were deleted, return -1 if there was an
-     *         error (this included if a row was not deleted)
-     */
-    int deleteOneUserDislikesTblRow(String userID, int messageID) {
-        int res = -1;
-        try {
-            mDeleteOneUserDislikes.setString(1, userID);
-            mDeleteOneUserDislikes.setInt(2, messageID);
-            res = mDeleteOneUserDislikes.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    } // End of userDislikesTbl methods
 
     /**
      * insertSessionTokenTblRow: Creates one entry in the sessionTokenTbl
@@ -915,139 +737,5 @@ public class Database {
         }
         return res;
     } // End of sessionTokenTbl methods
-
-    /**
-     * selectOneCommentsTblRow: selects one comment from the commentsTbl
-     * 
-     * @param commentID : an int for the commentID
-     * 
-     * @return : returns a UserLikesDataRow
-     */
-    CommentsDataRow selectOneCommentsTblRow(int commentID) {
-        CommentsDataRow res = null;
-        try {
-            mSelectOneComment.setInt(1, commentID);
-            ResultSet rs = mSelectOneComment.executeQuery();
-            if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new CommentsDataRow(rs.getInt("commentID"), rs.getInt("messageID"), rs.getString("userID"),
-                        rs.getString("content"));
-            } else {
-                res = null;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
-
-    /**
-     * selectMultipleCommentsTblRow: selects multiple comments for a message
-     * 
-     * @param messageID : an int for the messageID with all the corresponding
-     *                  comments
-     * 
-     * @return : returns an ArrayList of CommentsDataRow
-     */
-    ArrayList<CommentsDataRow> selectMultipleCommentsTblRow(int messageID) {
-        ArrayList<CommentsDataRow> res = new ArrayList<CommentsDataRow>();
-        try {
-            mSelectMultipleComments.setInt(1, messageID);
-            ResultSet rs = mSelectOneComment.executeQuery();
-            while (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res.add(new CommentsDataRow(rs.getInt("commentID"), rs.getInt("messageID"), rs.getString("userID"),
-                        rs.getString("content")));
-            }
-            rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return res;
-    }
-
-    /**
-     * selectMaxCommentID: selects the maximum commentID from the commentsTbl
-     * 
-     * @param NONE
-     * 
-     * @return : returns an int for the largest commentID
-     */
-    int selectMaxCommentID() {
-        int result = -1;
-        try {
-            ResultSet rs = mSelectMaxCommentID.executeQuery();
-            if (rs.next()) {
-                result = rs.getInt("commentID");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    /**
-     * insertCommentsTblRow: Creates one comment in the commentsTbl
-     * 
-     * @param commentID : an int for the commentID (primary key)
-     * @param messageID : an int for the messageID (foreign key)
-     * @param userID    : a String for the userID
-     * @param content   : a String for the comment content
-     * 
-     * @return : returns the number of rows in messageTbl
-     */
-    int insertCommentsTblRow(int commentID, int messageID, String userID, String content) {
-        int result = 0;
-        try {
-            mInsertOneComment.setInt(1, commentID);
-            mInsertOneComment.setInt(2, messageID);
-            mInsertOneComment.setString(3, userID);
-            mInsertOneComment.setString(4, content);
-            result = mInsertOneComment.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result; // returns the number of rows added either 1 or 0
-    }
-
-    /**
-     * updateOneCommentsTblRow: Creates one comment in the commentsTbl
-     * 
-     * @param commentID : an int for the commentID (primary key)
-     * @param messageID : an int for the messageID (foreign key)
-     * @param userID    : a String for the userID
-     * @param content   : a String for the comment content
-     * 
-     * @return : returns the number of rows in messageTbl
-     */
-    int updateOneCommentsTblRow(int commentID, String content) {
-        int result = 0;
-        try {
-            mUpdateOneComment.setInt(1, commentID);
-            mUpdateOneComment.setString(2, content);
-            result = mUpdateOneComment.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result; // returns the number of rows added either 1 or 0
-    }
-
-    /**
-     * deleteOneCommentsTblRow: deletes one row in commentsTbl
-     * 
-     * @param commentID : an int for the comment to delete
-     * 
-     * @return : The number of rows that were deleted, return -1 if there was an
-     *         error (this included if a row was not deleted)
-     */
-    int deleteOneCommentsTblRow(int commentID) {
-        int res = -1;
-        try {
-            mDeleteOneComment.setInt(1, commentID);
-            res = mDeleteOneComment.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    } // End of commentsTbl methods
 
 }

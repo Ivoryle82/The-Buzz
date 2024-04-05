@@ -29,10 +29,10 @@ public class UserLikesDataRowTest extends TestCase {
      * Ensure that the constructor populates every field of the object it creates
      */
     public void testConstructor() {
-        String userID = "testing userID"; // the username
+        String username = "testing username"; // the username
         int messageID = 456; // the messageID
-        UserLikesDataRow testUserLikesDataRow = new UserLikesDataRow(userID, messageID);
-        assertTrue(testUserLikesDataRow.mUserID.equals(userID));
+        UserLikesDataRow testUserLikesDataRow = new UserLikesDataRow(username, messageID);
+        assertTrue(testUserLikesDataRow.mUsername.equals(username));
         assertTrue(testUserLikesDataRow.mMessageID == messageID);
         assertFalse(testUserLikesDataRow.mDateCreated == null); // because this is automatically created, if it is null
         // something went wrong

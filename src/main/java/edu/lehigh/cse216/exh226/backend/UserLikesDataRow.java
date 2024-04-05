@@ -10,7 +10,7 @@ import java.util.Date;
  */
 
 public class UserLikesDataRow {
-    public String mUserID; // the userID
+    public String mUsername; // the username
     public int mMessageID; // the messageID
     public final Date mDateCreated; // the date created
 
@@ -22,8 +22,8 @@ public class UserLikesDataRow {
      * 
      * @return : a UserLikesDataRow object
      */
-    UserLikesDataRow(String userID, int messageID) {
-        mUserID = userID;
+    UserLikesDataRow(String username, int messageID) {
+        mUsername = username;
         mMessageID = messageID;
         mDateCreated = new Date();
     }

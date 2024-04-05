@@ -30,19 +30,16 @@ public class MessageDataRowTest extends TestCase {
      */
     public void testConstructor() {
         int messageID = 456; // the messageID (unique primary key) (this will be an int later)
-        String userID = "testing userID"; // the username (unique foreign key)
+        String username = "testing username"; // the username (unique foreign key)
         String title = "testing title"; // the message's title
         String content = "testing content"; // the message's content
-        int likeCount = 999; // the message's amount of likes
-        int dislikeCount = 999; // the message's amount of dislikes
-        MessageDataRow testMessageDataRow = new MessageDataRow(messageID, userID, title, content, likeCount,
-                dislikeCount);
+        int likeCount = 200; // the message's amount of likes
+        MessageDataRow testMessageDataRow = new MessageDataRow(username, messageID, title, content, likeCount);
         assertTrue(testMessageDataRow.mMessageID == messageID);
-        assertTrue(testMessageDataRow.mUserID.equals(userID));
+        assertTrue(testMessageDataRow.mUsername.equals(username));
         assertTrue(testMessageDataRow.mTitle.equals(title));
         assertTrue(testMessageDataRow.mContent.equals(content));
         assertTrue(testMessageDataRow.mLikeCount == likeCount);
-        assertTrue(testMessageDataRow.mDislikeCount == dislikeCount);
         assertFalse(testMessageDataRow.mDateCreated == null); // because this is automatically created, if it is null
                                                               // something went wrong
     }
