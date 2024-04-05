@@ -17,9 +17,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-
-import javax.xml.stream.events.Comment;
-
 import java.util.Date; // for createSessionToken & checkSessionToken
 import java.lang.Math; // for createSessionToken
 import java.text.SimpleDateFormat;
@@ -147,7 +144,7 @@ public class App {
         // System.out.println("TESTING: WE ARE IN exchangeCodeForIdToken method start");
         String clientId = CLIENT_ID;
         String clientSecret = System.getenv("CLIENT_SECRET");
-        String redirectUri = "http://localhost:4567/oauth-redirect";
+        String redirectUri = "https://team-goku.dokku.cse.lehigh.edu/oauth-redirect";
         String grantType = "authorization_code";
         String idTokenString = "";
 
@@ -244,22 +241,6 @@ public class App {
      * 
      * @return valid : a boolean for if the session token is valid
      */
-    public static boolean checkSessionToken(Database db, int sessionToken) {
-        // first get the session token from database parse to Date
-        SessionTokenDataRow sessionTokenDataRow = db.selectOneSessionTokenTblRow(sessionToken);
-        Date currentDate = new Date();
-        Date sessionTokenDateCreated = sessionTokenDataRow.mDateCreated;
-        // Calculate the time difference in milliseconds
-        long timeDifference = currentDate.getTime() - sessionTokenDateCreated.getTime();
-        // Convert milliseconds to hours
-        long hoursDifference = timeDifference / (1000 * 60 * 60);
-        if (hoursDifference > 5) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     /**
      * main() : the main method for app.java.
      * 1. Ports Java spark to listen to HTTP request via the browser from localhost
@@ -281,6 +262,9 @@ public class App {
         // Import google's Gson library as gson. SEE:
         // https://stackoverflow.com/questions/10380835/is-it-ok-to-use-gson-instance-as-a-static-field-in-a-model-bean-reuse
         final Gson gson = new Gson();
+
+        // I dont know why this is here, we should only ever getDatabase through the
+        // getDatabaseConnection method
 
         // Set up the location for serving static files (currently to deploy front-end)
         // If the STATIC_LOCATION environment variable is set, we will serve it.
@@ -391,78 +375,162 @@ public class App {
         });
 
         /**
+         * DEPRECATED
+         * Route for signing up (POST). Creates a new entry in the userTbl.
+         * Does not return any data to the front end.
+         * TECH DEBT: After sign up it should return a token that is similar to the
+         * login token.
+         * 
+         * Parameters(data in request.body):
+         * mBio : A String for the bio
+         * mEmail : A String for the email
+         * 
+         * Parameters(data in request.params):
+         * username : String
+         * password : String
+         */
+        /*
+         * Spark.post("/signup/:username/:password", (request, response) -> {
+         * // Ensure status of 200 OK, with a MIME type of JSON
+         * response.status(200);
+         * response.type("application/json");
+         * String username = request.params("username");
+         * String password = request.params("password");
+         * UserDataRow userData = gson.fromJson(request.body(), UserDataRow.class);
+         * String bio = userData.mBio;
+         * String email = userData.mEmail;
+         * 
+         * int numUsersAdded = db.insertUserTblRow(username, password, bio, email);
+         * return gson.toJson(new StructuredResponse("ok", "number of users added: " +
+         * numUsersAdded, null));
+         * });
+         */
+
+        /**
+         * DEPRECATED
+         * Route for logging in (GET). Queries the userTbl to see if the password
+         * matches
+         * with the username. If it does, return the username to the front-end. Serving
+         * as a token that authorizes that corresponding user's interactions. Else, do
+         * nothing (for now).
+         * 
+         * Parameters(data in request.body):
+         * none
+         * 
+         * Parameters(data in request.params):
+         * username : String
+         * password : String
+         * 
+         * Tech Debt: We should probably create an authorization token randomly and have
+         * it as field in the userTbl. Then, give that to the user.
+         * We should also pass to the web front end something to indicate a failed login
+         * attempt so the front-end can notify the user they got the password wrong
+         * 
+         * "http://localhost:4567/login/:username/:password"
+         */
+        /*
+         * Spark.get("/login/:username/:password", (request, response) -> {
+         * // Ensure status of 200 OK, with a MIME type of JSON
+         * response.status(200);
+         * response.type("application/json");
+         * String username = request.params("username");
+         * String password = request.params("password");
+         * UserDataRow user = db.selectOneUserTblRow(username);
+         * if (user.getPassword().equals(password)) {
+         * return gson.toJson(new StructuredResponse("ok", null, username));
+         * } else {
+         * return gson.toJson(new StructuredResponse("error", "failed login", null));
+         * }
+         * });
+         */
+
+        /**
          * Route to view user profile (GET)
          * 
          * Parameters(data in request.body):
          * none
          * 
          * Parameters(data in request url):
-         * userID : String
+         * username : String
          * 
-         * "http://localhost:4567/userprofiles/:userID"
+         * "http://localhost:4567/userprofiles:username"
          */
-        Spark.get("/userprofiles/:userID", (request, response) -> {
-            String userID = request.params("userID");
+        Spark.get("/userprofiles/:username", (request, response) -> {
+            String username = request.params("username");
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            return gson.toJson(new StructuredResponse("ok", null, db.selectOneUserTblRow(userID)));
+            return gson.toJson(new StructuredResponse("ok", null, db.selectOneUserTblRow(username)));
         });
 
         /**
-         * TECH DEBT: MAKE SO ONLY USER CAN UPDATE THEIR USER PROFILE
+         * TECH DEBT: FIX LATER TO COMPLY W/ OAUTH
          * Route to update user profile (PUT)
          * 
          * Parameters(data in request.body):
          * mNewUsername : String
-         * mEmail : String
+         * mPassword : String
          * mBio : String
+         * mEmail : String
+         * mUsername : String (this is for authentication)
          * 
          * Parameters(data in request url):
-         * userID : String
+         * username : String
          * 
-         * "http://localhost:4567/userprofiles/:userID"
+         * "http://localhost:4567/userprofiles/:username"
          * 
+         * TECH DEBT: username passed like this has many flaws, plz read everything I
+         * wrote about Tech Debt of creating an authentication token
          */
-        Spark.put("/userprofiles/:userID", (request, response) -> {
-            String userID = request.params("userID");
-            UserDataRow newUserData = gson.fromJson(request.body(), UserDataRow.class);
-            String newUsername = newUserData.mNewUsername;
-            String newEmail = newUserData.mEmail;
-            String newBio = newUserData.mBio;
-            // Ensure status of 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
-            int result = db.updateOneUserTblRow(userID, newUsername, newEmail, newBio);
-            if (result != -1) {
-                return gson.toJson(new StructuredResponse("ok", "user updated profile", null));
-            } else {
-                return gson.toJson(new StructuredResponse("error", "error updating profile", null));
-            }
-        });
+        // Spark.put("/userprofiles/:userID", (request, response) -> {
+        // String username = request.params("username");
+        // // Ensure status of 200 OK, with a MIME type of JSON
+        // response.status(200);
+        // response.type("application/json");
+
+        // UserRequest reqData = gson.fromJson(request.body(), UserRequest.class);
+        // UserDataRow userData = db.selectOneUserTblRow(username);
+
+        // if (reqData.mUsername.equals(userData.mUsername)) { // Front end is logged
+        // in, we are allowed to edit
+        // db.updateOneUserTblRow(userData.mUsername, reqData.mNewUsername,
+        // reqData.mPassword, reqData.mBio,
+        // reqData.mEmail);
+        // return gson.toJson(new StructuredResponse("ok", "user updated profile",
+        // null));
+        // } else {
+        // return gson.toJson(new StructuredResponse("error", "tried to edit a user that
+        // wasnt yours", null));
+        // }
+        // });
 
         /**
          * Route to delete user profile (DELETE)
          * 
          * Parameters(data in request.body):
-         * mUsername : String (for authentication) NOT IMPLEMENTED YET
+         * mUsername : String (for authentication)
          * 
          * Parameters(data in request url):
-         * userID : String
+         * username : String
          * 
-         * "http://localhost:4567/userprofiles/:userID"
+         * "http://localhost:4567/userprofiles/:username"
          */
         Spark.delete("/userprofiles/:username", (request, response) -> {
-            String userID = request.params("userID");
+            String username = request.params("username");
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
 
-            // UserRequest reqData = gson.fromJson(request.body(), UserRequest.class);
-            // UserDataRow userData = db.selectOneUserTblRow(userID);
-            db.deleteOneUserTblRow(userID);
-            return gson.toJson(new StructuredResponse("ok", "user deleted profile", null));
-        }); // END OF USERTBL ROUTES
+            UserRequest reqData = gson.fromJson(request.body(), UserRequest.class);
+            UserDataRow userData = db.selectOneUserTblRow(username);
+
+            if (reqData.mUsername.equals(userData.mUsername)) { // Front end is logged in, we are allowed to delete
+                db.deleteOneUserTblRow(userData.mUsername);
+                return gson.toJson(new StructuredResponse("ok", "user deleted profile", null));
+            } else {
+                return gson.toJson(new StructuredResponse("error", "tried to delete a user that wasnt yours", null));
+            }
+        });
 
         /**
          * Route to return all messages (GET). Queries the messageTbl and returns all
@@ -522,7 +590,7 @@ public class App {
          * Route to add one message to messageTbl (POST)
          * 
          * Parameters(data in request.body):
-         * mUserID : String
+         * mUsername : String
          * mTitle : String
          * mContent : String
          * 
@@ -539,7 +607,7 @@ public class App {
             response.type("application/json");
             // String messageID = request.params("messageID");
             MessageDataRow data = gson.fromJson(request.body(), MessageDataRow.class);
-            int numRows = db.insertMessageTblRow(data.mUserID, maximumMessageID, data.mTitle, data.mContent);
+            int numRows = db.insertMessageTblRow(data.mUsername, maximumMessageID, data.mTitle, data.mContent);
             return gson.toJson(new StructuredResponse("ok", "total messages: " + numRows, null));
         });
 
@@ -547,7 +615,7 @@ public class App {
          * Route to update one message in messageTbl (PUT)
          * 
          * Parameters(data in request.body):
-         * mUserID : String
+         * mUsername : String
          * mTitle : String
          * mContent : String
          * 
@@ -565,7 +633,7 @@ public class App {
 
             MessageDataRow reqData = gson.fromJson(request.body(), MessageDataRow.class);
             MessageDataRow msgData = db.selectOneMessageTblRow(messageID);
-            if (reqData.mUserID.equals(msgData.mUserID)) {
+            if (reqData.mUsername.equals(msgData.mUsername)) {
                 int numRows = db.updateOneMessageTblRow(messageID, reqData.mTitle, reqData.mContent);
                 return gson.toJson(new StructuredResponse("ok", "total messages: " + numRows, null));
             } else {
@@ -585,7 +653,7 @@ public class App {
          * Route to delete one message in messageTbl (DELETE)
          * 
          * Parameters(data in request.body):
-         * mUserID : String, this is so a user can only delete his messages. SO this
+         * mUsername : String, this is so a user can only delete his messages. SO this
          * must match the token given at login.
          * 
          * Parameters(data in request url):
@@ -603,8 +671,8 @@ public class App {
             // ensure status 200 OK, and MIME type of JSON
             response.status(200);
             response.type("application/json");
-            String reqUsername = gson.fromJson(request.body(), MessageDataRow.class).mUserID;
-            String msgUsername = db.selectOneMessageTblRow(messageID).mUserID;
+            String reqUsername = gson.fromJson(request.body(), MessageDataRow.class).mUsername;
+            String msgUsername = db.selectOneMessageTblRow(messageID).mUsername;
 
             if (reqUsername.equals(msgUsername)) {
                 return db.deleteOneMessageTblRow(messageID);
@@ -617,195 +685,35 @@ public class App {
          * Route to like or unlike a message (PUT)
          * 
          * Parameters(data in request.body):
-         * mUserID : String, this is so a user can only delete his messages. SO this
+         * mUsername : String, this is so a user can only delete his messages. SO this
          * must match the token given at login.
-         * mSessionToken : an int for the session token
          * 
          * Parameters(data in request url):
-         * messageID : a String that will be parsed to an int
+         * messageID : String (this will not be a required parameter after backend makes
+         * functionality to update the messageID as a unique int)
          * 
          * "http://localhost:4567/messages/:messageID/like"
          */
         Spark.put("/messages/:messageID/like", (request, response) -> {
+            int result;
+            int messageID = Integer.parseInt(request.params("messageID"));
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            int sessionToken = gson.fromJson(request.body(), SessionTokenDataRow.class).mSessionToken;
-            boolean validSessionToken = checkSessionToken(db, sessionToken);
-            if (validSessionToken) {
-                int result;
-                int messageID = Integer.parseInt(request.params("messageID"));
-                String userID = gson.fromJson(request.body(), MessageDataRow.class).mUserID;
-                UserLikesDataRow userLikesData = db.selectOneUserLikesTblRow(userID, messageID);
-                if (userLikesData == null) { // we havent disliked the message yet
-                    int likeCount = db.selectOneMessageTblRow(messageID).mLikeCount;
-                    result = db.updateOneMessageTblRowLikes(messageID, likeCount++);
-                    db.insertUserLikesTblRow(userID, messageID); // insert a userDislikes entry to confirm the
-                                                                 // dislike
-                } else {
-                    int likeCount = db.selectOneMessageTblRow(messageID).mLikeCount;
-                    result = db.updateOneMessageTblRowLikes(messageID, likeCount--);
-                    db.deleteOneUserLikesTblRow(userID, messageID); // delete a userDislikes entry to confirm the
-                                                                    // dislike removed
-                }
-                return gson.toJson(new StructuredResponse("ok", "total likes: " + result, null));
-            } else {
-                response.redirect("/");
-                return gson.toJson(new StructuredResponse("error", "Invalid Session", null));
-            }
-        });
 
-        /**
-         * Route to dislike or undislike a message (PUT)
-         * 
-         * Parameters(data in request.body):
-         * mSessionToken : an int for the session token
-         * 
-         * Parameters(data in request url):
-         * messageID : a String that will be parsed to an int
-         * 
-         * "http://localhost:4567/messages/:messageID/dislike"
-         */
-        Spark.put("/messages/:messageID/dislike", (request, response) -> {
-            // Ensure status of 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
-            int sessionToken = gson.fromJson(request.body(), SessionTokenDataRow.class).mSessionToken;
-            boolean validSessionToken = checkSessionToken(db, sessionToken);
-            if (validSessionToken) {
-                int result;
-                int messageID = Integer.parseInt(request.params("messageID"));
-                String userID = gson.fromJson(request.body(), MessageDataRow.class).mUserID;
-                UserDislikesDataRow userDislikesData = db.selectOneUserDislikesTblRow(userID, messageID);
-                if (userDislikesData == null) { // we havent disliked the message yet
-                    int dislikeCount = db.selectOneMessageTblRow(messageID).mDislikeCount;
-                    result = db.updateOneMessageTblRowDislikes(messageID, dislikeCount++);
-                    db.insertUserDislikesTblRow(userID, messageID); // insert a userDislikes entry to confirm the
-                                                                    // dislike
-                } else {
-                    int dislikeCount = db.selectOneMessageTblRow(messageID).mDislikeCount;
-                    result = db.updateOneMessageTblRowDislikes(messageID, dislikeCount--);
-                    db.deleteOneUserDislikesTblRow(userID, messageID); // delete a userDislikes entry to confirm the
-                                                                       // dislike removed
-                }
-                return gson.toJson(new StructuredResponse("ok", "total dislikes: " + result, null));
-            } else {
-                response.redirect("/");
-                return gson.toJson(new StructuredResponse("error", "Invalid Session", null));
-            }
-        });
+            String username = gson.fromJson(request.body(), MessageDataRow.class).mUsername;
+            int likeCount = db.selectOneMessageTblRow(messageID).mLikeCount;
+            UserLikesDataRow userLikesData = db.selectOneUserLikesTblRow(username, messageID);
 
-        /**
-         * Route to view multiple comments (GET)
-         * 
-         * Parameters(data in request.body):
-         * mSessionToken : an int for the session token
-         * 
-         * Parameters(data in request url):
-         * messageID : an int for the message id
-         * 
-         * "http://localhost:4567/comments/:messageID"
-         */
-        Spark.get("/comments/:messageID", (request, response) -> {
-            // Ensure status of 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
-            int sessionToken = gson.fromJson(request.body(), SessionTokenDataRow.class).mSessionToken;
-            boolean validSessionToken = checkSessionToken(db, sessionToken);
-            if (validSessionToken) {
-                int messageID = Integer.parseInt(request.params("messageID"));
-                return gson.toJson(new StructuredResponse("ok", "", db.selectMultipleCommentsTblRow(messageID)));
+            if (userLikesData == null) { // we haven't liked the message yet
+                likeCount++;
+                result = db.updateOneMessageTblRowLikes(messageID, likeCount);
             } else {
-                response.redirect("/");
-                return gson.toJson(new StructuredResponse("error", "Invalid Session", null));
+                likeCount--;
+                result = db.updateOneMessageTblRowLikes(messageID, likeCount);
             }
-        });
 
-        /**
-         * Route to add a comment (POST)
-         * 
-         * Parameters(data in request.body):
-         * mSessionToken : an int for the session token
-         * mUserID : a String for the userID
-         * mContent : a String for the content of the comment
-         * 
-         * Parameters(data in request url):
-         * messageID : an int for the message id
-         * 
-         * "http://localhost:4567/comments/:messageID"
-         */
-        Spark.post("/comments/:messageID", (request, response) -> {
-            // Ensure status of 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
-            int sessionToken = gson.fromJson(request.body(), SessionTokenDataRow.class).mSessionToken;
-            boolean validSessionToken = checkSessionToken(db, sessionToken);
-            if (validSessionToken) {
-                int messageID = Integer.parseInt(request.params("messageID"));
-                CommentsDataRow commentData = gson.fromJson(request.body(), CommentsDataRow.class);
-                int maxCommentID = db.selectMaxCommentID() + 1;
-                db.insertCommentsTblRow(maxCommentID, messageID, commentData.mUserID, commentData.mContent);
-                return gson.toJson(new StructuredResponse("ok", "", null));
-            } else {
-                response.redirect("/");
-                return gson.toJson(new StructuredResponse("error", "Invalid Session", null));
-            }
-        });
-
-        /**
-         * Route to edit a comment (PUT)
-         * 
-         * Parameters(data in request.body):
-         * mSessionToken : an int for the session token
-         * mContent : a String for the new content of the comment
-         * 
-         * Parameters(data in request url):
-         * commentID : an int for the commentID
-         * 
-         * "http://localhost:4567/comments/:messageID"
-         */
-        Spark.put("/comments/:commentID", (request, response) -> {
-            // Ensure status of 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
-            int sessionToken = gson.fromJson(request.body(), SessionTokenDataRow.class).mSessionToken;
-            boolean validSessionToken = checkSessionToken(db, sessionToken);
-            if (validSessionToken) {
-                int commentID = Integer.parseInt(request.params("commentID"));
-                CommentsDataRow commentData = gson.fromJson(request.body(), CommentsDataRow.class);
-                db.updateOneCommentsTblRow(commentID, commentData.mContent);
-                return gson.toJson(new StructuredResponse("ok", "", null));
-            } else {
-                response.redirect("/");
-                return gson.toJson(new StructuredResponse("error", "Invalid Session", null));
-            }
-        });
-
-        /**
-         * Route to delete a comment (DELETE)
-         * 
-         * Parameters(data in request.body):
-         * mSessionToken : an int for the session token
-         * 
-         * Parameters(data in request url):
-         * commentID : an int for the commentID
-         * 
-         * "http://localhost:4567/comments/:commentID"
-         */
-        Spark.delete("/comments/:commentID", (request, response) -> {
-            // Ensure status of 200 OK, with a MIME type of JSON
-            response.status(200);
-            response.type("application/json");
-            int sessionToken = gson.fromJson(request.body(), SessionTokenDataRow.class).mSessionToken;
-            boolean validSessionToken = checkSessionToken(db, sessionToken);
-            if (validSessionToken) {
-                int commentID = Integer.parseInt(request.params("commentID"));
-                db.deleteOneCommentsTblRow(commentID);
-                return gson.toJson(new StructuredResponse("ok", "", null));
-            } else {
-                response.redirect("/");
-                return gson.toJson(new StructuredResponse("error", "Invalid Session", null));
-            }
+            return gson.toJson(new StructuredResponse("ok", "total likes: " + result, null));
         });
     }
 }
