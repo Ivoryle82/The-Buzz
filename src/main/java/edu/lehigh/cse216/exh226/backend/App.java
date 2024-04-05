@@ -147,7 +147,7 @@ public class App {
         // System.out.println("TESTING: WE ARE IN exchangeCodeForIdToken method start");
         String clientId = CLIENT_ID;
         String clientSecret = System.getenv("CLIENT_SECRET");
-        String redirectUri = "http://localhost:4567/oauth-redirect";
+        String redirectUri = "https://team-goku.dokku.cse.lehigh.edu/oauth-redirect";
         String grantType = "authorization_code";
         String idTokenString = "";
 
@@ -325,7 +325,7 @@ public class App {
          * response_type=code&
          * client_id=233303483347-q0bt1d0gt235ji0k0nna3ilufa6d35qr.apps.googleusercontent.com&
          * scope=openid%20email%20profile&
-         * redirect_uri=http://localhost:4567/oauth-redirect&
+         * redirect_uri=https://team-goku.dokku.cse.lehigh.edu/oauth-redirect&
          * nonce=0394852-3190485-2490358& (THE WEB NEEDS TO GENERATE THIS)
          * 
          * oauth-redirect: creates a new user in the userTbl (essentially replaces the
