@@ -1,6 +1,6 @@
 package edu.lehigh.cse216.exh226.backend;
 
-import edu.lehigh.cse216.exh226.backend.UserLikesDataRow;
+import edu.lehigh.cse216.exh226.backend.UserDislikesDataRow;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -8,13 +8,13 @@ import junit.framework.TestSuite;
 /**
  * Unit test for simple App.
  */
-public class UserLikesDataRowTest extends TestCase {
+public class UserDislikesDataRowTest extends TestCase {
     /**
      * Create the test case
      * 
      * @param testName : name of the test case
      */
-    public UserLikesDataRowTest(String testName) {
+    public UserDislikesDataRowTest(String testName) {
         super(testName);
     }
 
@@ -22,7 +22,7 @@ public class UserLikesDataRowTest extends TestCase {
      * @return the suite of tests being tested
      */
     public static Test suite() {
-        return new TestSuite(UserLikesDataRowTest.class);
+        return new TestSuite(UserDislikesDataRowTest.class);
     }
 
     /**
@@ -31,10 +31,11 @@ public class UserLikesDataRowTest extends TestCase {
     public void testConstructor() {
         String userID = "testing userID"; // the username
         int messageID = 456; // the messageID
-        UserLikesDataRow testUserLikesDataRow = new UserLikesDataRow(userID, messageID);
-        assertTrue(testUserLikesDataRow.mUserID.equals(userID));
-        assertTrue(testUserLikesDataRow.mMessageID == messageID);
-        assertFalse(testUserLikesDataRow.mDateCreated == null); // because this is automatically created, if it is null
+        UserDislikesDataRow testUserDislikesDataRow = new UserDislikesDataRow(userID, messageID);
+        assertTrue(testUserDislikesDataRow.mUserID.equals(userID));
+        assertTrue(testUserDislikesDataRow.mMessageID == messageID);
+        assertFalse(testUserDislikesDataRow.mDateCreated == null); // because this is automatically created, if it is
+                                                                   // null
         // something went wrong
     }
 }
