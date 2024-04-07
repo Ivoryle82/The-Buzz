@@ -1,0 +1,6 @@
+src/main/resources/*
+*/.classpath
+*/.project
+*/.vscode/*
+*/.settings/*
+*/target/*
