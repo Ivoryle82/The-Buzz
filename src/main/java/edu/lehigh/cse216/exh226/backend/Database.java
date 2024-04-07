@@ -10,10 +10,6 @@ import java.sql.SQLException;
 
 import java.util.ArrayList;
 
-import javax.naming.spi.DirStateFactory.Result;
-
-import org.eclipse.jetty.server.session.Session;
-
 public class Database {
     /**
      * The connection to the database. When there is no connection, it should be
@@ -55,13 +51,6 @@ public class Database {
     private PreparedStatement mInsertOneMessage;
 
     /**
-     * mSelectMaxMessageID: returns the largest messageID from messageTbl, necessary
-     * for the server to properly increment the messageID when a new message is
-     * requested
-     */
-    private PreparedStatement mSelectMaxMessageID;
-
-    /**
      * mSelectOneMessage: selects one entry from messageTbl, necessary for
      * user to view any message
      */
@@ -96,18 +85,13 @@ public class Database {
     private PreparedStatement mUpdateOneMessageLikes;
 
     /**
-     * mUpdateMessageDislikes: updates the dislikeCount field only for and element
-     * in the messageTbl. Finds the message via messageID.
-     */
-    private PreparedStatement mUpdateOneMessageDislikes;
-
-    /**
      * mDeleteOneMessage: deletes one entry from messageTbl, necessary for
      * user to delete their profile.
      * Tech Debt: When deleting a message need to delete all corresponding data,
      * IE: the userLikes from the userLikesTbl
      */
     private PreparedStatement mDeleteOneMessage;
+
     // ========== End of messageTbl Prepared Statements =========
 
     // ========== Prepared Statements for userLikesTbl ==========
@@ -127,79 +111,43 @@ public class Database {
      * mDeleteOneUserLike: deletes one entry into the userLikeTbl
      */
     private PreparedStatement mDeleteOneUserLikes;
-    // ========== End of userLikesTbl Prepared Statements =========
 
-    // ========== Prepared Statements for userDislikesTbl ==========
-    /**
-     * mInsertOneUserLike: inserts one entry into the userLikeTbl
-     */
-    private PreparedStatement mInsertOneUserDislikes;
+    // ========== End of userLikesTbl Prepared Statements ========
 
-    /**
-     * mSelectOneUserLike: selects one entry from the userLikeTbl
-     * based on a passed username and messageID.
-     * If this returns null it means the user hasn't liked the message yet
-     */
-    private PreparedStatement mSelectOneUserDislikes;
+    // KEEP THE PREPARED STATEMENTS BELOW UNTIL AFTER TESTING THE ONES ABOVE
+    // /**
+    // * A prepared statement for getting all data in the database
+    // */
+    // private PreparedStatement mSelectAll;
 
-    /**
-     * mDeleteOneUserLike: deletes one entry into the userLikeTbl
-     */
-    private PreparedStatement mDeleteOneUserDislikes;
-    // ========== End of userLikesTbl Prepared Statements =========
+    // /**
+    // * A prepared statement for getting on row form the database
+    // */
+    // private PreparedStatement mSelectOne;
 
-    // =========== Prepared Statements for sessionTokenTbl ========
-    /**
-     * mInsertOneSessionToken: inserts one entry into the sessionTokenTbl
-     */
-    private PreparedStatement mInsertOneSessionToken;
+    // /**
+    // * A prepared statement for deleting a row from the database
+    // */
+    // private PreparedStatement mDeleteOne;
 
-    /**
-     * mSelectOneSessionToken: selects one session token based on the sessionToken
-     */
-    private PreparedStatement mSelectOneSessionToken;
+    // /**
+    // * A prepared statement for inseting into the database
+    // */
+    // private PreparedStatement mInsertOne;
 
-    /**
-     * mDeleteOneSessionToken: deletes on session token from sessionTokenTbl
-     */
-    private PreparedStatement mDeleteOneSessionToken;
-    // ========End of sessionTokenTbl Prepared Statements =========
+    // /**
+    // * A prepared statment for updating a single row in the database
+    // */
+    // private PreparedStatement mUpdateOne;
+    // /**
+    // * A prepared statement for creating the table in our database
+    // */
+    // private PreparedStatement mCreateTable;
 
-    // ========Start of commentsTbl Prepared Statements ===========
-    /**
-     * mSelectOneComment: Selects one comment from the commentsTbl based on the
-     * commentID
-     */
-    private PreparedStatement mSelectOneComment;
-
-    /**
-     * mSelectMultipleComments: Selects all comments for a specific messageID
-     */
-    private PreparedStatement mSelectMultipleComments;
-
-    /**
-     * mSelectMaxCommentID: returns the largest commentID from commentsTbl,
-     * necessary for the server to properly increment the commentID when a new
-     * comment is requested
-     */
-    private PreparedStatement mSelectMaxCommentID;
-
-    /**
-     * mInsertOneComment: inserts one comment into the comments table
-     * creates a new commentID based on an increment
-     */
-    private PreparedStatement mInsertOneComment;
-
-    /**
-     * mUpdateOneComment: edits one comment, takes in the commentID
-     * and new content
-     */
-    private PreparedStatement mUpdateOneComment;
-
-    /**
-     * mDeleteOneComment: deletes one comment, based on the commentID
-     */
-    private PreparedStatement mDeleteOneComment;
+    // /**
+    // * A prepared statment for dropping the table in our database
+    // */
+    // private PreparedStatement mDropTable;
 
     /**
      * createPreparedStatements: initialize all prepared statements
@@ -219,15 +167,14 @@ public class Database {
         // .prepareStatement("") The parameter is SQL language
         try {
             // Prepared Statements for userTbl
-            mInsertOneUser = mConnection.prepareStatement("INSERT INTO userTbl VALUES (?, ?, ?, ?)");
-            mSelectOneUser = mConnection.prepareStatement("SELECT * FROM userTbl WHERE userID=?");
+            mInsertOneUser = mConnection.prepareStatement("INSERT INTO userTbl VALUES (0, ?, ?, ?, ?)");
+            mSelectOneUser = mConnection.prepareStatement("SELECT * FROM userTbl WHERE username=?");
             mUpdateOneUser = mConnection.prepareStatement(
-                    "UPDATE userTbl SET username=?,email=?,bio=? WHERE userID=?");
-            mDeleteOneUser = mConnection.prepareStatement("DELETE FROM userTbl WHERE userID=?");
+                    "UPDATE userTbl SET userID=0,username=?,password=?,bio=?,email=? WHERE username=?");
+            mDeleteOneUser = mConnection.prepareStatement("DELETE FROM userTbl WHERE username=?");
 
             // Prepared Statements for messageTbl
-            mInsertOneMessage = mConnection.prepareStatement("INSERT INTO messageTbl VALUES (?,?,?,?,0,0)");
-            mSelectMaxMessageID = mConnection.prepareStatement("SELECT max(messageID) FROM messageTbl");
+            mInsertOneMessage = mConnection.prepareStatement("INSERT INTO messageTbl VALUES (?,?,?,?,0)");
             mSelectOneMessage = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE messageID=?");
             mSelectAllMessage = mConnection.prepareStatement("SELECT * FROM messageTbl");
             mSelectAllMessageForUser = mConnection.prepareStatement("SELECT * FROM messageTbl WHERE username=?");
@@ -235,37 +182,29 @@ public class Database {
                     "UPDATE messageTbl SET title=?,content=? WHERE messageID=?");
             mUpdateOneMessageLikes = mConnection.prepareStatement(
                     "UPDATE messageTbl SET likeCount=? WHERE messageID=?");
-            mUpdateOneMessageDislikes = mConnection.prepareStatement(
-                    "UPDATE messageTbl SET dislikeCount=? WHERE messageID=?");
             mDeleteOneMessage = mConnection.prepareStatement("DELETE FROM messageTbl WHERE messageID=?");
 
             // Prepared Statements for userLikesTbl
             mInsertOneUserLikes = mConnection.prepareStatement("INSERT INTO userLikesTbl VALUES (?,?)");
             mSelectOneUserLikes = mConnection
-                    .prepareStatement("SELECT * FROM userLikesTbl WHERE messageID=? AND userID=?");
+                    .prepareStatement("SELECT * FROM userLikesTbl WHERE messageID=? AND username=?");
             mDeleteOneUserLikes = mConnection
-                    .prepareStatement("DELETE FROM userLikesTbl WHERE userID=? AND messageID=?");
+                    .prepareStatement("DELETE FROM userLikesTbl WHERE username=? AND messageID=?");
 
-            // Prepared Statements for userLikesTbl
-            mInsertOneUserDislikes = mConnection.prepareStatement("INSERT INTO userDislikesTbl VALUES (?,?)");
-            mSelectOneUserDislikes = mConnection
-                    .prepareStatement("SELECT * FROM userDislikesTbl WHERE messageID=? AND userID=?");
-            mDeleteOneUserDislikes = mConnection
-                    .prepareStatement("DELETE FROM userDislikesTbl WHERE userID=? AND messageID=?");
-
-            // Prepared Statements for sessionTokenTbl
-            mInsertOneSessionToken = mConnection.prepareStatement("INSERT INTO sessionTokenTbl VALUES (?,?)");
-            mSelectOneSessionToken = mConnection.prepareStatement("SELECT * FROM sessionTokenTbl WHERE sessionToken=?");
-            mDeleteOneSessionToken = mConnection.prepareStatement("DELETE FROM sessionTokenTbl WHERE sessionToken=?");
-
-            // Prepared Statements for commentsTbl
-            mSelectOneComment = mConnection.prepareStatement("SELECT * FROM commentsTbl WHERE commentID=?");
-            mSelectMultipleComments = mConnection
-                    .prepareStatement("SELECT * FROM commentsTbl WHERE messageID=?");
-            mSelectMaxCommentID = mConnection.prepareStatement("SELECT max(commentID) FROM commentsTbl");
-            mInsertOneComment = mConnection.prepareStatement("INSERT INTO commentsTbl VALUES (?,?,?,?)");
-            mUpdateOneComment = mConnection.prepareStatement("UPDATE commentsTbl SET content=? WHERE commentID=?");
-            mDeleteOneComment = mConnection.prepareStatement("DELETE FROM commentsTbl WHERE commentID=?");
+            // BELOW STATEMENTS ARE UNECESSARY BUT KEEP THEM IN FOR NOW UNTIL AFTER TESTING
+            // mCreateTable = mConnection.prepareStatement(
+            // "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) NOT NULL,
+            // message VARCHAR(500) NOT NULL)");
+            // mDropTable = mConnection.prepareStatement("DROP TABLE tblData");
+            // mDeleteOne = mConnection.prepareStatement("DELETE FROM tblDATA WHERE id =
+            // ?");
+            // mInsertOne = mConnection.prepareStatement("INSERT INTO tblData VALUES
+            // (default, ?, ?)");
+            // mSelectAll = mConnection.prepareStatement("SELECT id, subject FROM tblData");
+            // mSelectOne = mConnection.prepareStatement("SELECT * from tblData WHERE
+            // id=?");
+            // mUpdateOne = mConnection.prepareStatement("UPDATE tblData SET message = ?
+            // WHERE id = ?");
         } catch (SQLException e) {
             System.err.println("Error creating prepared statements");
             e.printStackTrace();
@@ -400,21 +339,20 @@ public class Database {
     /**
      * insertUserTblRow: Creates one user in the userTbl
      * 
-     * @param userID   : an int for the userID
-     * @param username : a string for the username
-     * @param email    : a string for the user's email
-     *                 (The above 3 parameters are retrieved via OAUTH)
+     * @param username : a string for the username (primary key)
+     * @param password : a string for the password
      * @param bio      : a string for the user's biography
+     * @param email    : a string for the user's email
      * 
-     * @return : returns the userID of the new row in userTbl
+     * @return : returns the number of rows in userTbl
      */
-    int insertUserTblRow(String userID, String username, String email, String bio) {
+    int insertUserTblRow(String username, String password, String bio, String email) {
         int count = 0;
         try {
-            mInsertOneUser.setString(1, userID);
-            mInsertOneUser.setString(2, username);
-            mInsertOneUser.setString(3, email);
-            mInsertOneUser.setString(4, bio);
+            mInsertOneUser.setString(1, username);
+            mInsertOneUser.setString(2, password);
+            mInsertOneUser.setString(3, bio);
+            mInsertOneUser.setString(4, email);
             count += mInsertOneUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -425,20 +363,18 @@ public class Database {
     /**
      * selectOneUserTblRow: selects one user from the userTbl
      * 
-     * @param userID : the userID (unique primary key) for an element in userTbl
+     * @param username : the username (unique primary key) for an element in userTbl
      * 
      * @return : returns a UserDataRow
      */
-    UserDataRow selectOneUserTblRow(String userID) {
+    UserDataRow selectOneUserTblRow(String username) {
         UserDataRow res = null;
         try {
-            mSelectOneUser.setString(1, userID);
+            mSelectOneUser.setString(1, username);
             ResultSet rs = mSelectOneUser.executeQuery();
             if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
                 res = new UserDataRow(rs.getString("username"), rs.getString("password"),
                         rs.getString("bio"), rs.getString("email"));
-            } else {
-                res = null;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -453,27 +389,23 @@ public class Database {
      * update any number of these fields, or have front end deal w/ this
      * just need to make sure we pass enough parameters (and correct ones) in here
      * 
-     * Tech Debt: on OAUTH sign in the email should automatically update to what the
-     * OAUTH returns as a google email can change unexpectedly.
-     * 
-     * NB: it doesn't matter if a user updates their username, email, or bio. Even
-     * though these fields were provided by OAUTH. As long as userID never changes.s
-     * 
-     * @param userID      : an int for the userID of the userTbl row to update *
+     * @param username    : a String for username of the userTbl row to update
      * @param newUsername : a String for the new username
-     * @param newEmail    : a String for the new email
+     * @param newPassword : a String for the new password
      * @param newBio      : a String for the new bio
+     * @param newEmail    : a String for the new email
      * 
      * @return : returns an int for the number of rows that were updated, or -1 if
      *         there was an error
      */
-    int updateOneUserTblRow(String userID, String newUsername, String newEmail, String newBio) {
+    int updateOneUserTblRow(String username, String newUsername, String newPassword, String newBio, String newEmail) {
         int res = -1;
         try {
             mUpdateOneUser.setString(1, newUsername);
-            mUpdateOneUser.setString(2, newEmail);
+            mUpdateOneUser.setString(2, newPassword);
             mUpdateOneUser.setString(3, newBio);
-            mUpdateOneUser.setString(4, userID); // this is how we query the specific row in userTbl
+            mUpdateOneUser.setString(4, newEmail);
+            mUpdateOneUser.setString(5, username); // this is how we query the specific row in userTbl
             res = mUpdateOneUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -489,10 +421,10 @@ public class Database {
      * @return : The number of rows that were deleted, return -1 if there was an
      *         error
      */
-    int deleteOneUserTblRow(String userID) {
+    int deleteOneUserTblRow(String username) {
         int res = -1;
         try {
-            mDeleteOneUser.setString(1, userID);
+            mDeleteOneUser.setString(1, username);
             res = mDeleteOneUser.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -513,59 +445,38 @@ public class Database {
      * 
      * @return : returns the number of rows in messageTbl
      */
-    int insertMessageTblRow(String username, int messageID, String title, String content) {
-        int result = 0;
+    int insertMessageTblRow(String username, String messageID, String title, String content, int likeCount) {
+        int count = 0;
         try {
             mInsertOneMessage.setString(1, username);
-            mInsertOneMessage.setInt(2, messageID);
+            mInsertOneMessage.setString(2, messageID);
             mInsertOneMessage.setString(3, title);
             mInsertOneMessage.setString(4, content);
-            result = mInsertOneMessage.executeUpdate();
+            mInsertOneMessage.setInt(5, likeCount);
+            count += mInsertOneMessage.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return result; // returns the number of rows added either 1 or 0
-    }
-
-    /**
-     * selectMaxMessageID: selects the maximum messageID from the messageTbl
-     * 
-     * @param NONE
-     * 
-     * @return : returns an int for the largest messageID
-     */
-    int selectMaxMessageID() {
-        int result = -1;
-        try {
-            ResultSet rs = mSelectMaxMessageID.executeQuery();
-            if (rs.next()) {
-                result = rs.getInt("messageID");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
+        return count;
     }
 
     /**
      * selectOneMessageTblRow: selects one message from the messageTbl
      * 
-     * @param messageID : a int for the messageID (unique primary key) for an
+     * @param messageID : a String for the messageID (unique primary key) for an
      *                  element in messageTbl
      * 
      * @return : returns a MessageDataRow
      */
-    MessageDataRow selectOneMessageTblRow(int messageID) {
+    MessageDataRow selectOneMessageTblRow(String messageID) {
         MessageDataRow res = null;
         try {
-            mSelectOneMessage.setInt(1, messageID);
+            mSelectOneMessage.setString(1, messageID);
             ResultSet rs = mSelectOneMessage.executeQuery();
             if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new MessageDataRow(rs.getInt("messageID"), rs.getString("userID"),
-                        rs.getString("title"), rs.getString("content"), rs.getInt("likeCount"),
-                        rs.getInt("dislikeCount"));
+                res = new MessageDataRow(rs.getString("username"), rs.getString("messageID"),
+                        rs.getString("title"), rs.getString("content"), rs.getInt("likeCount"));
             }
-            rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -585,8 +496,8 @@ public class Database {
             mSelectAllMessageForUser.setString(1, username);
             ResultSet rs = mSelectAllMessageForUser.executeQuery();
             while (rs.next()) {
-                res.add(new MessageDataRow(rs.getInt("messageID"), rs.getString("userID"), rs.getString("title"),
-                        rs.getString("content"), rs.getInt("likeCount"), rs.getInt("dislikeCount")));
+                res.add(new MessageDataRow(rs.getString("username"), rs.getString("messageID"), rs.getString("title"),
+                        rs.getString("content"), rs.getInt("likeCount")));
             }
             rs.close();
             return res;
@@ -608,8 +519,8 @@ public class Database {
         try {
             ResultSet rs = mSelectAllMessage.executeQuery();
             while (rs.next()) {
-                res.add(new MessageDataRow(rs.getInt("messageID"), rs.getString("userID"), rs.getString("title"),
-                        rs.getString("content"), rs.getInt("likeCount"), rs.getInt("dislikeCount")));
+                res.add(new MessageDataRow(rs.getString("username"), rs.getString("messageID"), rs.getString("title"),
+                        rs.getString("content"), rs.getInt("likeCount")));
             }
             rs.close();
             return res;
@@ -626,19 +537,19 @@ public class Database {
      * update any number of these fields, or have front end deal w/ this
      * just need to make sure we pass enough parameters (and correct ones) in here
      * 
-     * @param messageID  : an int for the messageID
+     * @param messageID  : a String for the messageID
      * @param newTitle   : a String for the new password
      * @param newContent : a String for the new bio
      *
      * @return : returns an int for the number of rows that were updated, or -1 if
      *         there was an error
      */
-    int updateOneMessageTblRow(int messageID, String newTitle, String newContent) {
+    int updateOneMessageTblRow(String messageID, String newTitle, String newContent) {
         int res = -1;
         try {
             mUpdateOneMessage.setString(1, newTitle);
             mUpdateOneMessage.setString(2, newContent);
-            mUpdateOneMessage.setInt(3, messageID); // this is how we query the specific row in messageTbl
+            mUpdateOneMessage.setString(3, messageID); // this is how we query the specific row in messageTbl
             res = mUpdateOneMessage.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -657,47 +568,18 @@ public class Database {
      * selectOneMessageTblRow anyway before incrementing or decrementing the
      * likeCount
      * 
-     * @param messageID    : an int for the messageID
+     * @param messageID    : a String for the messageID
      * @param newLikeCount : an int for the new likeCount
      *
      * @return : returns an int for the number of rows that were updated, or -1 if
      *         there was an error
      */
-    int updateOneMessageTblRowLikes(int messageID, int newLikeCount) {
+    int updateOneMessageTblRowLikes(String messageID, int newLikeCount) {
         int res = -1;
         try {
             mUpdateOneMessageLikes.setInt(1, newLikeCount);
-            mUpdateOneMessageLikes.setInt(2, messageID); // this is how we query the specific row in messageTbl
+            mUpdateOneMessageLikes.setString(2, messageID); // this is how we query the specific row in messageTbl
             res = mUpdateOneMessageLikes.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
-
-    /**
-     * updateOneMessageTblRowDislikes : updates one row in the messageTbl
-     * 
-     * Tech Debt: In the backend we can use the selectOneMessageTblRow to first get
-     * the likes and have that increment or decrement via a route to that method.
-     * Then use that resulting value to update the likeCount.
-     * OR we could have 2 separate database methods, 1 for inc and 1 for dec
-     * likeCount, BUT, doing that would require us to call the
-     * selectOneMessageTblRow anyway before incrementing or decrementing the
-     * likeCount
-     * 
-     * @param messageID    : an int for the messageID
-     * @param newLikeCount : an int for the new likeCount
-     *
-     * @return : returns an int for the number of rows that were updated, or -1 if
-     *         there was an error
-     */
-    int updateOneMessageTblRowDislikes(int messageID, int newDislikeCount) {
-        int res = -1;
-        try {
-            mUpdateOneMessageDislikes.setInt(1, newDislikeCount);
-            mUpdateOneMessageDislikes.setInt(2, messageID); // this is how we query the specific row in messageTbl
-            res = mUpdateOneMessageDislikes.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -707,15 +589,15 @@ public class Database {
     /**
      * deleteOneMessageTblRow: deletes one row in messageTbl
      * 
-     * @param messageID : a int for the message of the messageTbl row to delete
+     * @param messageID : a String for the message of the messageTbl row to delete
      * 
      * @return : The number of rows that were deleted, return -1 if there was an
      *         error
      */
-    int deleteOneMessageTblRow(int messageID) {
+    int deleteOneMessageTblRow(String messageID) {
         int res = -1;
         try {
-            mDeleteOneMessage.setInt(1, messageID);
+            mDeleteOneMessage.setString(1, messageID);
             res = mDeleteOneMessage.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -727,15 +609,15 @@ public class Database {
      * insertUserLikesTblRow: Creates one userLikes in the userLikesTbl
      * 
      * @param username  : a string for the username
-     * @param messageID : a int for the messageID
+     * @param messageID : a String for the messageID
      * 
      * @return : returns the number of rows in userLikesTbl
      */
-    int insertUserLikesTblRow(String username, int messageID) {
+    int insertUserLikesTblRow(String username, String messageID) {
         int count = 0;
         try {
             mInsertOneUserLikes.setString(1, username);
-            mInsertOneUserLikes.setInt(2, messageID);
+            mInsertOneUserLikes.setString(2, messageID);
             count += mInsertOneUserLikes.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -747,18 +629,18 @@ public class Database {
      * selectOneUserLikesTblRow: selects one userLikes from the userLikesTbl
      * 
      * @param username  : a String for the username of an element in userLikesTbl
-     * @param messageID : a int for the messageID of an element in userLikesTbl
+     * @param messageID : a String for the messageID of an element in userLikesTbl
      * 
      * @return : returns a UserLikesDataRow
      */
-    UserLikesDataRow selectOneUserLikesTblRow(String username, int messageID) {
+    UserLikesDataRow selectOneUserLikesTblRow(String username, String messageID) {
         UserLikesDataRow res = null;
         try {
             mSelectOneUserLikes.setString(1, username);
-            mSelectOneUserLikes.setInt(2, messageID);
+            mSelectOneUserLikes.setString(2, messageID);
             ResultSet rs = mSelectOneUserLikes.executeQuery();
             if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new UserLikesDataRow(rs.getString("userID"), rs.getInt("messageID"));
+                res = new UserLikesDataRow(rs.getString("username"), rs.getString("messageID"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -777,11 +659,11 @@ public class Database {
      * @return : The number of rows that were deleted, return -1 if there was an
      *         error (this included if a row was not deleted)
      */
-    int deleteOneUserLikesTblRow(String username, int messageID) {
+    int deleteOneUserLikesTblRow(String username, String messageID) {
         int res = -1;
         try {
             mDeleteOneUserLikes.setString(1, username);
-            mDeleteOneUserLikes.setInt(2, messageID);
+            mDeleteOneUserLikes.setString(2, messageID);
             res = mDeleteOneUserLikes.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -789,265 +671,135 @@ public class Database {
         return res;
     } // End of userLikesTbl methods
 
-    /**
-     * insertUserDislikesTblRow: Creates one userLikes in the userLikesTbl
-     * 
-     * @param userID    : a string for the userID
-     * @param messageID : a int for the messageID
-     * 
-     * @return : returns the number of rows in userLikesTbl
-     */
-    int insertUserDislikesTblRow(String userID, int messageID) {
-        int count = 0;
-        try {
-            mInsertOneUserDislikes.setString(1, userID);
-            mInsertOneUserDislikes.setInt(2, messageID);
-            count += mInsertOneUserDislikes.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
+    // BELOW METHODS ARE UNECESSARY AND WILL BE DELETED
+
+    // /**
+    // * insertRow: Insert a row into the database
+    // *
+    // * @param subject : The subject for this new row
+    // * @param message : The message body for this new row
+    // *
+    // * @return : The number of rows that were inserted
+    // */
+    // int insertRow(String subject, String message) {
+    // int count = 0;
+    // try {
+    // mInsertOne.setString(1, subject);
+    // mInsertOne.setString(2, message);
+    // count += mInsertOne.executeUpdate();
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return count;
+    // }
+
+    // /**
+    // * Query the database for a list of all subjects and their IDs
+    // * Equivalent to DataStore.readAll
+    // *
+    // * @return All rows, as an ArrayList of RowData (rows) objects
+    // */
+    // ArrayList<DataRow> selectAll() {
+    // ArrayList<DataRow> res = new ArrayList<DataRow>();
+    // try {
+    // ResultSet rs = mSelectAll.executeQuery(); // executeQuery i assumed executes
+    // // SQL. So here it is selecting
+    // // all via the PreparedStatement to select all
+    // while (rs.next()) {
+    // res.add(new DataRow(rs.getInt("id"), rs.getString("subject"), null));
+    // }
+    // rs.close();
+    // return res;
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // return null;
+    // }
+    // }
+
+    // /**
+    // * Get all data for a specific row, by ID
+    // *
+    // * @param id : The id of the row beign requested
+    // *
+    // * @return :The data for the requested row (RowData object), or null if
+    // * invalid
+    // * ID
+    // */
+    // DataRow selectOne(int id) {
+    // DataRow res = null;
+    // try {
+    // mSelectOne.setInt(1, id);
+    // ResultSet rs = mSelectOne.executeQuery();
+    // if (rs.next()) { // Why do we do rs.next()?
+    // res = new DataRow(rs.getInt("id"), rs.getString("subject"),
+    // rs.getString("message"));
+    // }
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return res;
+    // }
+
+    // /**
+    // * Delete a row by ID
+    // *
+    // * @param id : The id of the row to delete
+    // *
+    // * @return : The number of rows that were deleted. -1 indicates an error.
+    // */
+    // int deleteRow(int id) {
+    // int res = -1;
+    // try {
+    // mDeleteOne.setInt(1, id);
+    // res = mDeleteOne.executeUpdate(); // Execute update differs from execute
+    // query
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return res;
+    // }
+
+    // /**
+    // * Update the message for a row in the database
+    // *
+    // * @param id : The id of the row to update
+    // * @param message : the new message contents
+    // *
+    // * @return : The number of rows that were updated. -1 indicates an error
+    // */
+    // int updateOne(int id, String message) {
+    // int res = -1;
+    // try {
+    // mUpdateOne.setString(1, message);
+    // mUpdateOne.setInt(2, id);
+    // res = mUpdateOne.executeUpdate();
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return res;
+    // }
 
     /**
-     * selectOneUserDislikesTblRow: selects one userLikes from the userLikesTbl
-     * 
-     * @param userID    : a String for the userID of an element in userLikesTbl
-     * @param messageID : a int for the messageID of an element in userLikesTbl
-     * 
-     * @return : returns a UserLikesDataRow
+     * Create tblData. If it already exists, print an error
+     * we know it creates tblData bc that is the name from the PreparedStatement
      */
-    UserDislikesDataRow selectOneUserDislikesTblRow(String userID, int messageID) {
-        UserDislikesDataRow res = null;
-        try {
-            mSelectOneUserDislikes.setString(1, userID);
-            mSelectOneUserDislikes.setInt(2, messageID);
-            ResultSet rs = mSelectOneUserDislikes.executeQuery();
-            if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new UserDislikesDataRow(rs.getString("userID"), rs.getInt("messageID"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
+    // void createTable() {
+    // try {
+    // mCreateTable.execute(); // another new execute command, prob differs based on
+    // SQL content
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // }
 
-    /**
-     * deleteOneUserDislikesTblRow: deletes one row in userLikesTbl
-     * 
-     * @param userID    : a String for the userID of the userLikesTbl row to
-     *                  delete
-     * @param messageID : a String for the messageID of the userLikesTbl row to
-     *                  delete
-     * 
-     * @return : The number of rows that were deleted, return -1 if there was an
-     *         error (this included if a row was not deleted)
-     */
-    int deleteOneUserDislikesTblRow(String userID, int messageID) {
-        int res = -1;
-        try {
-            mDeleteOneUserDislikes.setString(1, userID);
-            mDeleteOneUserDislikes.setInt(2, messageID);
-            res = mDeleteOneUserDislikes.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    } // End of userDislikesTbl methods
-
-    /**
-     * insertSessionTokenTblRow: Creates one entry in the sessionTokenTbl
-     * 
-     * @param sessionToken : an int for the session token
-     * @param dateCreated  : a String parsed from Java Date class, format must be:
-     *                     "yyyy-MM-dd HH:mm:ss"
-     * 
-     * @return : returns the number of rows in sessionTokenTbl
-     */
-    int insertSessionTokenTblRow(int sessionToken, String dateCreated) {
-        int count = 0;
-        try {
-            mInsertOneSessionToken.setInt(1, sessionToken);
-            mInsertOneSessionToken.setString(2, dateCreated);
-            count += mInsertOneSessionToken.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
-
-    /**
-     * selectOneSessionTokenTblRow: selects one entry from the sessionTokenTbl
-     * 
-     * @param sessionToken : an int for the sessionToken of the entry to select
-     * 
-     * @return : returns a SessionTokenTblRow
-     */
-    SessionTokenDataRow selectOneSessionTokenTblRow(int sessionToken) {
-        SessionTokenDataRow res = null;
-        try {
-            mSelectOneSessionToken.setInt(1, sessionToken);
-            ResultSet rs = mSelectOneSessionToken.executeQuery();
-            if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new SessionTokenDataRow(rs.getInt("sessionToken"), rs.getString("dateCreated"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
-
-    /**
-     * deleteOneSessionTokenTblRow: deletes one row in sessionTokenTbl
-     * 
-     * @param sessionToken : an int for the session token to delete
-     * 
-     * @return : The number of rows that were deleted, return -1 if there was an
-     *         error (this included if a row was not deleted)
-     */
-    int deleteOneSessionTokenTblRow(int sessionToken) {
-        int res = -1;
-        try {
-            mDeleteOneSessionToken.setInt(1, sessionToken);
-            res = mDeleteOneSessionToken.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    } // End of sessionTokenTbl methods
-
-    /**
-     * selectOneCommentsTblRow: selects one comment from the commentsTbl
-     * 
-     * @param commentID : an int for the commentID
-     * 
-     * @return : returns a UserLikesDataRow
-     */
-    CommentsDataRow selectOneCommentsTblRow(int commentID) {
-        CommentsDataRow res = null;
-        try {
-            mSelectOneComment.setInt(1, commentID);
-            ResultSet rs = mSelectOneComment.executeQuery();
-            if (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res = new CommentsDataRow(rs.getInt("commentID"), rs.getInt("messageID"), rs.getString("userID"),
-                        rs.getString("content"));
-            } else {
-                res = null;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    }
-
-    /**
-     * selectMultipleCommentsTblRow: selects multiple comments for a message
-     * 
-     * @param messageID : an int for the messageID with all the corresponding
-     *                  comments
-     * 
-     * @return : returns an ArrayList of CommentsDataRow
-     */
-    ArrayList<CommentsDataRow> selectMultipleCommentsTblRow(int messageID) {
-        ArrayList<CommentsDataRow> res = new ArrayList<CommentsDataRow>();
-        try {
-            mSelectMultipleComments.setInt(1, messageID);
-            ResultSet rs = mSelectOneComment.executeQuery();
-            while (rs.next()) { // rs.next() verifies if there is an element in the ResultSet
-                res.add(new CommentsDataRow(rs.getInt("commentID"), rs.getInt("messageID"), rs.getString("userID"),
-                        rs.getString("content")));
-            }
-            rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return res;
-    }
-
-    /**
-     * selectMaxCommentID: selects the maximum commentID from the commentsTbl
-     * 
-     * @param NONE
-     * 
-     * @return : returns an int for the largest commentID
-     */
-    int selectMaxCommentID() {
-        int result = -1;
-        try {
-            ResultSet rs = mSelectMaxCommentID.executeQuery();
-            if (rs.next()) {
-                result = rs.getInt("commentID");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    /**
-     * insertCommentsTblRow: Creates one comment in the commentsTbl
-     * 
-     * @param commentID : an int for the commentID (primary key)
-     * @param messageID : an int for the messageID (foreign key)
-     * @param userID    : a String for the userID
-     * @param content   : a String for the comment content
-     * 
-     * @return : returns the number of rows in messageTbl
-     */
-    int insertCommentsTblRow(int commentID, int messageID, String userID, String content) {
-        int result = 0;
-        try {
-            mInsertOneComment.setInt(1, commentID);
-            mInsertOneComment.setInt(2, messageID);
-            mInsertOneComment.setString(3, userID);
-            mInsertOneComment.setString(4, content);
-            result = mInsertOneComment.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result; // returns the number of rows added either 1 or 0
-    }
-
-    /**
-     * updateOneCommentsTblRow: Creates one comment in the commentsTbl
-     * 
-     * @param commentID : an int for the commentID (primary key)
-     * @param messageID : an int for the messageID (foreign key)
-     * @param userID    : a String for the userID
-     * @param content   : a String for the comment content
-     * 
-     * @return : returns the number of rows in messageTbl
-     */
-    int updateOneCommentsTblRow(int commentID, String content) {
-        int result = 0;
-        try {
-            mUpdateOneComment.setInt(1, commentID);
-            mUpdateOneComment.setString(2, content);
-            result = mUpdateOneComment.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result; // returns the number of rows added either 1 or 0
-    }
-
-    /**
-     * deleteOneCommentsTblRow: deletes one row in commentsTbl
-     * 
-     * @param commentID : an int for the comment to delete
-     * 
-     * @return : The number of rows that were deleted, return -1 if there was an
-     *         error (this included if a row was not deleted)
-     */
-    int deleteOneCommentsTblRow(int commentID) {
-        int res = -1;
-        try {
-            mDeleteOneComment.setInt(1, commentID);
-            res = mDeleteOneComment.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return res;
-    } // End of commentsTbl methods
-
+    // /**
+    // * Remove tblData from the database. If it does not exist, print an error
+    // */
+    // void dropTable() {
+    // try {
+    // mDropTable.execute();
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // }
 }
