@@ -29,13 +29,13 @@ public class MessageDataRowTest extends TestCase {
      * Ensure that the constructor populates every field of the object it creates
      */
     public void testConstructor() {
-        String messageID = "testing messageID"; // the messageID (unique primary key) (this will be an int later)
+        int messageID = 456; // the messageID (unique primary key) (this will be an int later)
         String username = "testing username"; // the username (unique foreign key)
         String title = "testing title"; // the message's title
         String content = "testing content"; // the message's content
         int likeCount = 200; // the message's amount of likes
-        MessageDataRow testMessageDataRow = new MessageDataRow(messageID, username, title, content, likeCount);
-        assertTrue(testMessageDataRow.mMessageID.equals(messageID));
+        MessageDataRow testMessageDataRow = new MessageDataRow(username, messageID, title, content, likeCount);
+        assertTrue(testMessageDataRow.mMessageID == messageID);
         assertTrue(testMessageDataRow.mUsername.equals(username));
         assertTrue(testMessageDataRow.mTitle.equals(title));
         assertTrue(testMessageDataRow.mContent.equals(content));

@@ -339,7 +339,7 @@ public class App {
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
-            String messageID = request.params("messageID");
+            int messageID = Integer.parseInt(request.params("messageID"));
             return gson.toJson(new StructuredResponse("ok", null, db.selectOneMessageTblRow(messageID)));
         });
 
@@ -348,25 +348,23 @@ public class App {
          * 
          * Parameters(data in request.body):
          * mUsername : String
-         * mMessageID : String
          * mTitle : String
          * mContent : String
-         * mLikeCount : int
          * 
          * Parameters(data in request url):
-         * messageID : String (this will not be a required parameter after backend makes
+         * None
          * functionality to update the messageID as a unique int)
          * 
          * "http://localhost:4567/messages/add"
          */
-        Spark.post("/messages:messageID/add", (request, response) -> {
+        Spark.post("/messages/add", (request, response) -> {
             // Ensure status of 200 OK, with a MIME type of JSON
+            int maximumMessageID = db.selectMaxMessageID() + 1;
             response.status(200);
             response.type("application/json");
-            String messageID = request.params("messageID");
+            // String messageID = request.params("messageID");
             MessageDataRow data = gson.fromJson(request.body(), MessageDataRow.class);
-            int numRows = db.insertMessageTblRow(data.mUsername, messageID, data.mTitle, data.mContent,
-                    data.mLikeCount);
+            int numRows = db.insertMessageTblRow(data.mUsername, maximumMessageID, data.mTitle, data.mContent);
             return gson.toJson(new StructuredResponse("ok", "total messages: " + numRows, null));
         });
 
@@ -385,7 +383,7 @@ public class App {
          * "http://localhost:4567/messages:messageID/edit"
          */
         Spark.put("/messages:messageID/edit", (request, response) -> {
-            String messageID = request.params("messageID");
+            int messageID = Integer.parseInt(request.params("messageID"));
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");
@@ -423,7 +421,7 @@ public class App {
          */
         Spark.delete("/messages:messageID/delete", (request, response) -> {
             // If we can't get an ID, Spark will send a status 500
-            String messageID = request.params("messageID");
+            int messageID = Integer.parseInt(request.params("messageID"));
             // ensure status 200 OK, and MIME type of JSON
             response.status(200);
             response.type("application/json");
@@ -441,7 +439,7 @@ public class App {
          * Route to like or unlike a message (PUT)
          * 
          * Parameters(data in request.body):
-         * username : String, this is so a user can only delete his messages. SO this
+         * mUsername : String, this is so a user can only delete his messages. SO this
          * must match the token given at login.
          * 
          * Parameters(data in request url):
@@ -452,7 +450,7 @@ public class App {
          */
         Spark.put("/messages:messageID/like", (request, response) -> {
             int result;
-            String messageID = request.params("messageID");
+            int messageID = Integer.parseInt(request.params("messageID"));
             // Ensure status of 200 OK, with a MIME type of JSON
             response.status(200);
             response.type("application/json");

@@ -16,3 +16,20 @@ Current Backend - Evan
 
 * Current ERD diagram:
 ![Alt text](ERD_3-24-2024.png)
+
+# Deploying to dokku : Tech Debt
+
+* The remote dokku branch is named "team-goku"
+* To deploy first go to the backend-dokku branch in origin (BEFORE DOING THIS: Do git remote -a to view the remote branches).
+* do "git read-tree backend:backend" in the backend-dokku to get your backend changes into the backend-dokku
+* commit that
+* push it to origin/backend-dokku
+
+* git push team-goku backend-dokku:master
+
+### To start and stop dokku app:  
+```# run on LOCAL host
+$ ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'ps:start team-goku'```
+
+```# run on LOCAL host
+$ ssh -i ~/.ssh/id_ed25519 -t dokku@dokku.cse.lehigh.edu 'ps:stop team-goku'```

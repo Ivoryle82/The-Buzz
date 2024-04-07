@@ -1,21 +1,21 @@
-package edu.lehigh.cse216.exh226.backend.requests;
+// package edu.lehigh.cse216.exh226.backend.requests;
 
-/**
- * SimpleRequest provides a format for clients to present title and message
- * strings to the server
- * 
- * NB: since this will be created from JSON, all fields must be public, and we
- * do not need a constructor
- */
+// /**
+// * SimpleRequest provides a format for clients to present title and message
+// * strings to the server
+// *
+// * NB: since this will be created from JSON, all fields must be public, and we
+// * do not need a constructor
+// */
 
-public class UserRequest {
-    /**
-     * the UserId provided by client
-     */
-    public String mUID;
+// public class UserRequest {
+// /**
+// * the UserId provided by client
+// */
+// public String mUID;
 
-    /**
-     * The message being provided by the client
-     */
-    public String mBio;
-}
+// /**
+// * The message being provided by the client
+// */
+// public String mBio;
+// }
