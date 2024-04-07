@@ -1,0 +1,111 @@
+.welcome-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: auto;
+}
+
+.background-image-1 {
+    position: absolute;
+    bottom: 0; /* Position at the top */
+    left: 250px; /* Position at the left */
+    width: 100px; /* Adjust width of images as needed */
+    height: auto; /* Maintain aspect ratio */
+    background-image: url('../../public/text.png'); /* URL to your image */
+    background-size: contain; /* Ensure images fit within container */
+    background-repeat: no-repeat; /* Prevent image repetition */
+    animation: floatUpDown1 15s ease-in-out infinite; /* Apply animation */
+}
+
+.background-image-2 {
+    position: absolute;
+    bottom: 0; /* Position at the bottom */
+    right: 50px; /* Position at the right */
+    width: 200px; /* Adjust width of images as needed */
+    height: auto; /* Maintain aspect ratio */
+    background-image: url('../../public/text.png'); /* URL to your image */
+    background-size: contain; /* Ensure images fit within container */
+    background-repeat: no-repeat; /* Prevent image repetition */
+    animation: floatUpDown2 8s ease-in-out infinite; /* Apply animation */
+}
+
+.background-image-3 {
+    position: absolute;
+    bottom: 0; /* Position at the bottom */
+    left: 50px; /* Position at the left */
+    width: 150px; /* Adjust width of images as needed */
+    height: auto; /* Maintain aspect ratio */
+    background-image: url('../../public/text.png'); /* URL to your image */
+    background-size: contain; /* Ensure images fit within container */
+    background-repeat: no-repeat; /* Prevent image repetition */
+    animation: floatUpDown3 10s ease-in-out infinite; /* Apply animation */
+}
+
+.background-image-4 {
+    position: absolute;
+    bottom: 0; /* Position at the bottom */
+    right: 250px; /* Position at the right */
+    width: 100px; /* Adjust width of images as needed */
+    height: auto; /* Maintain aspect ratio */
+    background-image: url('../../public/text.png'); /* URL to your image */
+    background-size: contain; /* Ensure images fit within container */
+    background-repeat: no-repeat; /* Prevent image repetition */
+    animation: floatUpDown4 9s ease-in-out infinite; /* Apply animation */
+}
+
+@keyframes floatUpDown1 {
+    0%, 100% { top: 10%; }
+    50% { top: 80%; }
+}
+
+@keyframes floatUpDown2 {
+    0%, 100% { top: 20%; }
+    50% { top: 70%; }
+}
+
+@keyframes floatUpDown3 {
+    0%, 100% { top: 80%; }
+    50% { top: 20%; }
+}
+
+@keyframes floatUpDown4 {
+    0%, 100% { top: 40%; }
+    50% { top: 20%; }
+}
+
+
+.foreground-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding-top: 160px; /* Increase padding top to move content lower */
+    margin-top: 70px; /* Add margin top to move content lower */
+}
+
+.slogan {
+    font-size: 5em; /* Adjust font size */
+    font-weight: bold; /* Add bold font weight */
+    color: #333; /* Set text color */
+    margin-bottom: 20px; /* Add bottom margin */
+}
+
+.slogan span {
+    color: rgb(19, 153, 194); /* Set text color to blue */
+}
+
+.sign-in-button {
+    padding: 10px 20px; /* Add padding */
+    font-size: 1.2em; /* Adjust font size */
+    background-color: #0a293d; /* Set background color */
+    color: #fff; /* Set text color */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Add border radius */
+    cursor: pointer; /* Add pointer cursor */
+    transition: background-color 0.3s ease; /* Add smooth transition */
+}
+
+.sign-in-button:hover {
+    background-color: #0a293d; /* Change background color on hover */
+}
+
+
