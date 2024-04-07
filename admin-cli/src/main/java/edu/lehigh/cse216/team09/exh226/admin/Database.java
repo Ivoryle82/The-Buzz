@@ -105,7 +105,7 @@ public class Database {
     static Database getDatabase(String ip, String port, String user, String pass) {
         // Create an un-configured Database object
         Database db = new Database();
-
+        
         // Give the Database object a connection, fail if we cannot get one
         try {
             Connection conn = DriverManager.getConnection("jdbc:postgresql://" + ip + ":" + port + "/", user, pass);
@@ -130,17 +130,86 @@ public class Database {
 
             // Note: no "IF NOT EXISTS" or "IF EXISTS" checks on table 
             // creation/deletion, so multiple executions will cause an exception
+            //USER TABLE
             db.mCreateTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE tblData (id SERIAL PRIMARY KEY, subject VARCHAR(50) "
-                    + "NOT NULL, message VARCHAR(500) NOT NULL)");
-            db.mDropTable = db.mConnection.prepareStatement("DROP TABLE tblData");
-
+                    "CREATE TABLE userTbl (userID VARCHAR(225), username VARCHAR(225), email VARCHAR(225), bio VARCHAR(225))");
+            
+            // db.mCreateTable = db.mConnection.prepareStatement(
+            //         "CREATE TABLE userTbl (userID VARCHAR(225)  "
+            //         + "NOT NULL, message VARCHAR(500) NOT NULL)");
+            
+            db.mDropTable = db.mConnection.prepareStatement("DROP TABLE userTbl");
+            //db.mCreateTable = db.mConnection.prepareStatement()
             // Standard CRUD operations
-            db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM tblData WHERE id = ?");
-            db.mInsertOne = db.mConnection.prepareStatement("INSERT INTO tblData VALUES (default, ?, ?)");
-            db.mSelectAll = db.mConnection.prepareStatement("SELECT id, subject FROM tblData");
-            db.mSelectOne = db.mConnection.prepareStatement("SELECT * from tblData WHERE id=?");
-            db.mUpdateOne = db.mConnection.prepareStatement("UPDATE tblData SET message = ? WHERE id = ?");
+            db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM userTbl WHERE id = ?");
+            db.mInsertOne = db.mConnection.prepareStatement("INSERT INTO userTbl VALUES (default, ?, ?)");
+            db.mSelectAll = db.mConnection.prepareStatement("SELECT id, subject FROM userTbl");
+            db.mSelectOne = db.mConnection.prepareStatement("SELECT * from userTbl WHERE id=?");
+            db.mUpdateOne = db.mConnection.prepareStatement("UPDATE userTbl SET message = ? WHERE id = ?");
+
+            //MESSAGE TABLE
+            db.mCreateTable = db.mConnection.prepareStatement(
+                "CREATE TABLE messageTbl (username VARCHAR(50), messageID int, title VARCHAR(225), content VARCHAR(225), likeCount int)");
+            // db.mCreateTable = db.mConnection.prepareStatement(
+            //     "CREATE TABLE messageTbl (id SERIAL PRIMARY KEY, subject VARCHAR(50) "
+            //     + "NOT NULL, message VARCHAR(500) NOT NULL)");
+
+            db.mDropTable = db.mConnection.prepareStatement("DROP TABLE messageTbl");
+            //db.mCreateTable = db.mConnection.prepareStatement()
+            // Standard CRUD operations
+            db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM messageTbl WHERE id = ?");
+            db.mInsertOne = db.mConnection.prepareStatement("INSERT INTO messageTbl VALUES (default, ?, ?)");
+            db.mSelectAll = db.mConnection.prepareStatement("SELECT id, subject FROM messageTbl");
+            db.mSelectOne = db.mConnection.prepareStatement("SELECT * from messageTbl WHERE id=?");
+            db.mUpdateOne = db.mConnection.prepareStatement("UPDATE messageTbl SET message = ? WHERE id = ?");
+
+            //USERLIKES TABLE
+            db.mCreateTable = db.mConnection.prepareStatement(
+                "CREATE TABLE userLikesTbl (username VARCHAR(225), messageID int)");
+            // db.mCreateTable = db.mConnection.prepareStatement(
+            //     "CREATE TABLE messageTbl (id SERIAL PRIMARY KEY, subject VARCHAR(50) "
+            //     + "NOT NULL, message VARCHAR(500) NOT NULL)");
+
+            db.mDropTable = db.mConnection.prepareStatement("DROP TABLE userLikesTbl");
+            //db.mCreateTable = db.mConnection.prepareStatement()
+            // Standard CRUD operations
+            db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM userLikesTbl WHERE id = ?");
+            db.mInsertOne = db.mConnection.prepareStatement("INSERT INTO userLikesTbl VALUES (default, ?, ?)");
+            db.mSelectAll = db.mConnection.prepareStatement("SELECT id, subject FROM userLikesTbl");
+            db.mSelectOne = db.mConnection.prepareStatement("SELECT * from userLikesTbl WHERE id=?");
+            db.mUpdateOne = db.mConnection.prepareStatement("UPDATE userLikesTbl SET message = ? WHERE id = ?");
+
+            //USER DISLIKES TABLE
+            db.mCreateTable = db.mConnection.prepareStatement(
+                "CREATE TABLE userDislikesTbl (username VARCHAR(225), messageID int)");
+            // db.mCreateTable = db.mConnection.prepareStatement(
+            //     "CREATE TABLE messageTbl (id SERIAL PRIMARY KEY, subject VARCHAR(50) "
+            //     + "NOT NULL, message VARCHAR(500) NOT NULL)");
+
+            db.mDropTable = db.mConnection.prepareStatement("DROP TABLE userDislikesTbl");
+            //db.mCreateTable = db.mConnection.prepareStatement()
+            // Standard CRUD operations
+            db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM userDislikesTbl WHERE id = ?");
+            db.mInsertOne = db.mConnection.prepareStatement("INSERT INTO userDislikesTbl VALUES (default, ?, ?)");
+            db.mSelectAll = db.mConnection.prepareStatement("SELECT id, subject FROM userDislikesTbl");
+            db.mSelectOne = db.mConnection.prepareStatement("SELECT * from userDislikesTbl WHERE id=?");
+            db.mUpdateOne = db.mConnection.prepareStatement("UPDATE userDislikesTbl SET message = ? WHERE id = ?");
+
+             //COMMENTS TABLE
+             db.mCreateTable = db.mConnection.prepareStatement(
+                "CREATE TABLE commentsTbl (commentID int, messageID int, username VARCHAR(225), content VARCHAR(225))");
+            // db.mCreateTable = db.mConnection.prepareStatement(
+            //     "CREATE TABLE messageTbl (id SERIAL PRIMARY KEY, subject VARCHAR(50) "
+            //     + "NOT NULL, message VARCHAR(500) NOT NULL)");
+
+            db.mDropTable = db.mConnection.prepareStatement("DROP TABLE commentsTbl");
+            //db.mCreateTable = db.mConnection.prepareStatement()
+            // Standard CRUD operations
+            db.mDeleteOne = db.mConnection.prepareStatement("DELETE FROM commentsTbl WHERE id = ?");
+            db.mInsertOne = db.mConnection.prepareStatement("INSERT INTO commentsTbl VALUES (default, ?, ?)");
+            db.mSelectAll = db.mConnection.prepareStatement("SELECT id, subject FROM commentsTbl");
+            db.mSelectOne = db.mConnection.prepareStatement("SELECT * from commentsTbl WHERE id=?");
+            db.mUpdateOne = db.mConnection.prepareStatement("UPDATE commentsTbl SET message = ? WHERE id = ?");
         } catch (SQLException e) {
             System.err.println("Error creating prepared statement");
             e.printStackTrace();

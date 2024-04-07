@@ -89,6 +89,7 @@ public class App {
                     break;
                 case 'T':
                     db.createTable();
+                    
                     break;
                 case 'D':
                     db.dropTable();
