@@ -1,4 +1,4 @@
-# Phase 2 Sprint 8 - PM Report Template
+# Phase 2 Sprint 9 - PM Report Template
 Use this form to provide your project manager report. 
 
 <!-- PM: When editing this template for your submission, you may remove this section -->
@@ -40,21 +40,21 @@ Team Members, Roles, and links to jira & repos:
 > Yes
 
 2. Has the team been gathering for a weekly, in-person meeting(s)? If not, why not?
-> Yes we gathered at regular meeting time on monday and on wednesday to complete all of our diagrams. we also met with our group mentor on wednesday
+> Yes we gathered at regular meeting time on monday and on wednesday and implemented the new buzz interface with OAuth login.
 
 3. Summarize how well the team met the requirements of this sprint.
-> We met all the requirements since it was mainly creating and updating our essentail diagrams, tests, and user stories
+> We met all the requirements as far as implementing oAuth, likes and dislikes, as well as comments. Only a few small bug fixes as we move toward the next phase with limited technical debt
 4. Report on each member's progress (phase activity completion) – "what is the status?"
-> As a group we completed all sprint requirments with hands on colaboration. We are currently preparing to implement oAuth. 
+> The progress has been good. Evan has worked very hard on getting the backend to work with the Oauth and all the routes. 
 
 5. Summary of "code review" during which each team member discussed and showed their progress – "how did you confirm the status?"
-> We have a shared lucid chart where we can see the status of each diagrams and work on them simoutaniouly. We commincated a lot through text to make sure everything was complete.
+> We showed demos to eachother in person and shared updates on the progress of their branch with any other problems.
 6. What did you do to encourage the team to be working on phase activities "sooner rather than later"?
->I helped our team plan a meeting time with Dennis so we could all work together on updating and creating the documents for the current sprint 
+>I helped our team plan a meeting time with Dennis so we could help each other out. Made sure we were all on time 
 7. What did you do to encourage the team to help one another?
-> We openly encourage conversations and asked question for guidance from other group memebers if we needed help.
+> We openly encourage conversations and asked question for guidance from other group memebers if we needed help. 
 8. How well is the team communicating?
-> the team is doing a great job communcating through text, in person, and slack
+> the team is doing a great job communcating through text, in person, and slack.
 9. Discuss expectations the team has set for one another, if any. Please highlight any changes from last week.
 > Our expectations include:
 * completing assigned tasks on time
@@ -80,11 +80,11 @@ Self-evaluation of PM performance
 > Cathcing up on our technical debt. We have our backend umpleneted but we are still having issues in our admin class. Once we work through these issues we will be set and hopefully catch up.
 
 6. Describe the most significant obstacle or difficulty your team faced.
-> probably technical debt. We had issues with getting our backend up early and needed much assistance from the mentors which slowed down testing for everyone. This prevented us from further finding errors in code that we beleived to be correct but couldnt implement correctly. 
+> the initialization of the oauth proved to be difficult for ourteam as we encounted issue is passing through google and handling its packages.
 7. What might you suggest the team or the next PM "start", "stop", or "continue" doing in the next sprint?
 > We should start catching up on our debt
-> stop putting things off
+> stop waiting to ask questions and let everyone know about your problems early.
 > continue submitting everything on time
 
 8. Is there anything you wish to add?
-> Its a pleasure working with this team
+> Its a pleasure working with this team as always
