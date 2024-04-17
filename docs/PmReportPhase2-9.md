@@ -43,9 +43,9 @@ Team Members, Roles, and links to jira & repos:
 > Yes we gathered at regular meeting time on monday and on wednesday and implemented the new buzz interface with OAuth login.
 
 3. Summarize how well the team met the requirements of this sprint.
-> We met all the requirements as far as implementing oAuth, likes and dislikes, as well as comments. Only a few small bug fixes as we move toward the next phase with limited technical debt
+> We met all the requirements as far as implementing oAuth, likes and dislikes, as well as comments. Only a few small bug fixes as we move toward the next phase with limited technical debt. We are in the process of reworking our backend though which we have a focus on the upcoming week to deal with. 
 4. Report on each member's progress (phase activity completion) – "what is the status?"
-> The progress has been good. Evan has worked very hard on getting the backend to work with the Oauth and all the routes. 
+> The progress has been good. Evan has worked very hard on getting the backend to work with the Oauth and all the routes. Due to continuing issues with the backend we have had to redeploy it a few times. This is preventing some of the other branches from doinhg their testing
 
 5. Summary of "code review" during which each team member discussed and showed their progress – "how did you confirm the status?"
 > We showed demos to eachother in person and shared updates on the progress of their branch with any other problems.
@@ -67,7 +67,7 @@ Team Members, Roles, and links to jira & repos:
 Self-evaluation of PM performance
 
 1. When did your team meet with your mentor, and for how long?
-> We met on monday night and wednesday for 4-5 ish hours in total
+> We met on monday night and wednesday again for 4-5 ish hours in total
 2. How did you conduct team meetings? How did your team interact outside of these meetings? Highlight any changes from last week.
 > We meet during class time and at the citl in FML. We picked a mutal time and date that would work for everyone
 3. What techniques (daily check-ins/scrums, team programming, timelines, Jira use, slack use, group design exercises) did you use to mitigate risk? Highlight any changes from last week.
