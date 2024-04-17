@@ -132,7 +132,7 @@ public class Database {
             // creation/deletion, so multiple executions will cause an exception
             //USER TABLE
             db.mCreateTable = db.mConnection.prepareStatement(
-                    "CREATE TABLE userTbl (userID VARCHAR(225), username VARCHAR(225), email VARCHAR(225), bio VARCHAR(225))");
+                    "CREATE TABLE userTbl (userID VARCHAR(225), username VARCHAR(225), email VARCHAR(225), bio VARCHAR(225), valid boolean default false)");
             
             // db.mCreateTable = db.mConnection.prepareStatement(
             //         "CREATE TABLE userTbl (userID VARCHAR(225)  "
