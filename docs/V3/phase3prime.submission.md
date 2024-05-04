@@ -85,55 +85,27 @@ Admin User Stories and Unit Tests
 
 ## General questions
 
-1. Did the PM for this week submit this report (If not, why not?)? 
-    - Yes, the PM submitted this report
-2. Has the team been gathering for a weekly, in-person meeting(s)? If not, why not?
-    - Yes.
-3. Summarize how well the team met the requirements of this sprint.
-    - This sprint the team met the requirements well. 
-4.  Report on each member's progress (sprint and phase activity completion) – "what is the status?"
-    * If incomplete, what challenges are being overcome, how are they being overcome, and by when will the team member be able to finish?
-    * If complete, how do you know everyone completed the work, and at a satisfactory level?
+1. What required Phase 3 functionality still has not been implemented or is not operating properly and why?
+    <!-- PM: When editing this template for your submission, you may remove this guidance -->
+    * List this based on a component-by-component basis, as appropriate.
+    * Caching in the web branch still hasn't been implemented. 
+    * converting images to base64 for the mobile branch
 
-    Jialin: Admin
-    - 
-    Ivory: Backend
-    - 
-    Evan: Mobile
-    - 
-    Sam: Web 
-    - 
-5. Summary of "code review" during which each team member discussed and showed their progress – "how did you confirm the status?"
-    - We confirmed the status during the code review by seeing if the code passed our unit tests for the sprint.
-    - The mobile end demonstrated their progress by launching Flutter, showing us the progress, and going through the unit tests
-    - The web end demonstrated their progress by launching their web front-end, showing us the progress, and going through their unit tests
-    - The backend demonstrated their unit tests and functionality using postman
-    - Admin demonstrated functionality through the unit testing by looking at the elephantSQL
+2. What technical debt remains?
+    <!-- PM: When editing this template for your submission, you may remove this guidance -->
+    * List this based on a component-by-component basis, as appropriate.
+    * caching for the web and mobile branches. 
+    * for mobile branch, getting oauth to work and converting images to base64. 
 
-6. What did you do to encourage the team to be working on phase activities "sooner rather than later"?
-    - I encouraged through slack and text messages. Making sure that there was communication between the branches, especially those that are were connected. (Web->backend<-mobile) 
-    - We also consistently messaged through imessages
+3. If there was any remaining Phase 3 functionality that needed to be implemented in Phase 3', what did the PM do to assist in the effort of getting this functionality implemented and operating properly?
 
-7. What did you do to encourage the team to help one another?
-    - We consistently asked each other questions if we were stuck, and I encouraged certain members to communicate their personal progress, regardless of if they know the answer. Some feedback is better than none. 
+    * I assisted in trying to help wth suggesting different solutions to fix the internal server issues and merge conflicts
 
-8. How well is the team communicating?
-    - There is often small bickering between team members, but we still move forwards. To be more productive, I tell them to communicate whether or not they have their work done, or if they are struggling because others are able to help with the issues. 
+4. Describe how the team worked together in Phase 3'. Were all members engaged? Was the work started early in the week or was there significant procrastination?
+    * The work started early in the week, though due to our conflicting schedules, we had to work asynchronously 
 
-9. Discuss expectations the team has set for one another, if any. Please highlight any changes from last week.
-    - We have set the expectation that we should communicate our issues so we can help each other and further the progress of the project.
-    - We also have meetings twice a week to discuss progress and issues. In addition to this, we communicate through slack and text messages.
-
-10. If anything was especially challenging or unclear, please make sure this is [1] itemized, [2] briefly described, [3] its status reported (resolved or unresolved), and [4] includes critical steps taken to find resolution.
-    * Challenge: Merge conflict 
-        * Status: unresolved
-        * Description: There is a problem with the web that has led to over 400 merge conflicts.
-        * Critical steps taken to find resolution:
-            * Identified that it was due to not having the right things in the .gitignore. 
-            * solution was to deny the merge request and have them retry after fixing the gitignore. 
-
-11. What might you suggest the team or the next PM "start", "stop", or "continue" doing in the next sprint?
-    * I would suggest that we meet in person more frequently to make faster progress on work. It is harder when meeting on zoom because you can only show one screen at a time. 
+5. What might you suggest the team or the next PM "start", "stop", or "continue" doing in the next Phase (if there were one)?
+    * I would suggest trying to meet and work more synchronously in person.
 
 ### Back-end
 
@@ -267,7 +239,7 @@ Admin User Stories and Unit Tests
 8. Evaluate the quality of the unit tests for the admin app
     - the admin the user tests include checking the elaphantSQL and running mvn exec
 9. Describe any technical debt you see in the admin app
-    - deleting least accessed files
+    - none
 
 ### Web
 
@@ -298,8 +270,7 @@ Admin User Stories and Unit Tests
 8. Evaluate the quality of the unit tests for the Web front-end
     - The unit tests are functioning correctly.
 9. Describe any technical debt you see in the Web front-end
-    - logging in and posting aren't working
-    - the functionality of the program isn't working
+    - caching
 ### Mobile
 
 1. Overall evaluation of Mobile development (how was the process? was Jira used appropriately? how were tasks created? how was completion of tasks verified?)
