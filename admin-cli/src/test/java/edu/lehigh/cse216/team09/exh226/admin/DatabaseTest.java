@@ -1,54 +1,59 @@
-// package edu.lehigh.cse216.team09.exh226.admin;
+package edu.lehigh.cse216.team09.exh226.admin;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import java.util.ArrayList;
 
-// import junit.framework.TestCase;
-// import java.util.ArrayList;
-// import java.util.Map;
+public class DatabaseTest extends TestCase {
+    private Database database;
 
-// public class DatabaseTest extends TestCase {
-//     private Database db;
-//     private Map<String, String> env;
+    public DatabaseTest(String testName) {
+        super(testName);
+    }
 
-//     public void setUp() {
-//     // Set up the environment variables
-//     env = System.getenv();
-//     String ip = env.get("POSTGRES_IP");
-//     String port = env.get("POSTGRES_PORT");
-//     String user = env.get("POSTGRES_USER");
-//     String pass = env.get("POSTGRES_PASS");
+    public static Test suite() {
+        return new TestSuite(DatabaseTest.class);
+    }
 
-//     // Get a fully-configured connection to the database
-//     db = Database.getDatabase(ip, port, user, pass);
+    public void setUp() {
+        // Set up the database connection for each test
+        database = Database.getDatabase("jelani.db.elephantsql.com", "5432", "zpzzdvck", "bB7p6OwexymsYGtZphn1VxrD8TX-zk27");
+        assertNotNull(database); // Ensure database connection is successful
+    }
 
-//     // Check if db is null
-//     if (db == null) {
-//         fail("Failed to initialize database connection");
-//     }
-// }
+    public void tearDown() {
+        // Close the database connection after each test
+        assertTrue(database.disconnect());
+    }
 
-//     protected void tearDown() {
-//         // Disconnect from the database
-//         db.disconnect();
-//     }
+    public void testInsertMessage() {
+        int result = database.insertMessage("userID", 0, "Title", "Content", 0, 0, "fileId");
+        assertEquals(1, result); // Expecting one row to be inserted
+    }
 
-//     public void testInsertRow() {
-//         // Insert a row into the database
-//         int rowsAdded = db.insertRow("Test Subject", "Test Message");
+    public void testSelectAllMessages() {
+        ArrayList<Database.RowData> messages = database.selectAllMessages();
+        assertNotNull(messages); // Expecting non-null array list
+    }
 
-//         // Check if the row was successfully added
-//         assertEquals(1, rowsAdded);
-//     }
+    public void testSelectOneMessage() {
+        Database.RowData message = database.selectOneMessage(0);
+        assertNotNull(message); // Expecting non-null message object
+    }
 
-//     public void testSelectAll() {
-//         // Insert a row into the database
-//         db.insertRow("Test Subject", "Test Message");
+    public void testUpdateMessage() {
+        int result = database.updateMessage(0, "Updated Title", "Updated Content", 1, 1, "file");
+        assertTrue(result != 0);
+    }
 
-//         // Get all rows from the database
-//         ArrayList<Database.RowData> rows = db.selectAll();
+    public void testDeleteMessage() {
+        int result = database.deleteMessage(0);
+        assertTrue(result != 0);
+    }
 
-//         // Check if at least one row was returned
-//         assertNotNull(rows);
-//         assertFalse(rows.isEmpty());
-//     }
+    // public void testInvalidateIdea() {
+    //     boolean result = database.invalidateIdea(1);
+    //     assertTrue(result); // Expecting idea to be invalidated successfully
+    // }
 
-//     // Add more test cases for other methods in the Database class
-// }
+}
